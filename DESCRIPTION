@@ -1,6 +1,6 @@
 Package: healthbR
 Title: Access Brazilian Public Health Data
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person("Sidney", "Bissoli", , "sbissoli76@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0001-0442-3700"))
@@ -16,16 +16,16 @@ Encoding: UTF-8
 RoxygenNote: 7.3.3
 Depends: R (>= 4.2.0)
 Imports: tibble, dplyr, readxl, curl, cli, rlang, stringr, janitor,
-        arrow, purrr
-Suggests: testthat (>= 3.0.0), knitr, rmarkdown, furrr, future
+        purrr
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown, furrr, future, arrow
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: https://github.com/SidneyBissoli/healthbR
 BugReports: https://github.com/SidneyBissoli/healthbR/issues
 NeedsCompilation: no
-Packaged: 2026-01-29 11:59:13 UTC; SIDNEY
+Packaged: 2026-02-04 02:06:15 UTC; SIDNEY
 Author: Sidney Bissoli [aut, cre] (ORCID:
     <https://orcid.org/0009-0001-0442-3700>)
 Maintainer: Sidney Bissoli <sbissoli76@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-02-03 10:40:07 UTC
+Date/Publication: 2026-02-04 08:20:36 UTC
