@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Primary Care Coverage with SISAB</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Primary Care Coverage with SISAB</h1>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>The <strong>SISAB (Sistema de Informacao em Saude para a Atencao
+Basica)</strong> provides primary care coverage indicators for Brazil,
+maintained by the Ministry of Health (SAPS). Unlike other DATASUS
+modules that use FTP, SISAB data is fetched from a public REST API.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Source</td>
+<td>REST API (relatorioaps.saude.gov.br)</td>
+</tr>
+<tr class="even">
+<td>Data type</td>
+<td>Aggregated coverage indicators</td>
+</tr>
+<tr class="odd">
+<td>Report types</td>
+<td>4 (APS, oral health, community agents, PNS)</td>
+</tr>
+<tr class="even">
+<td>Geographic levels</td>
+<td>4 (Brazil, region, UF, municipality)</td>
+</tr>
+<tr class="odd">
+<td>Frequency</td>
+<td>Monthly (by CNES competencia)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="report-types" class="section level2">
+<h2>Report types</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Name</th>
+<th>Availability</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>aps</strong></td>
+<td>APS coverage (primary care teams)</td>
+<td>2019–present</td>
+</tr>
+<tr class="even">
+<td><strong>sb</strong></td>
+<td>Oral health coverage (dental teams)</td>
+<td>2024–present</td>
+</tr>
+<tr class="odd">
+<td><strong>acs</strong></td>
+<td>Community health agents (ACS)</td>
+<td>2007–present</td>
+</tr>
+<tr class="even">
+<td><strong>pns</strong></td>
+<td>PNS coverage (National Health Survey)</td>
+<td>2020–2023</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="geographic-levels" class="section level2">
+<h2>Geographic levels</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Level</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>&quot;brazil&quot;</code></td>
+<td>National total</td>
+</tr>
+<tr class="even">
+<td><code>&quot;region&quot;</code></td>
+<td>5 macro-regions</td>
+</tr>
+<tr class="odd">
+<td><code>&quot;uf&quot;</code></td>
+<td>27 states (default)</td>
+</tr>
+<tr class="even">
+<td><code>&quot;municipality&quot;</code></td>
+<td>~5,570 municipalities</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="getting-started" class="section level2">
+<h2>Getting started</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(healthbR)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<div id="check-available-years" class="section level3">
+<h3>Check available years</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">sisab_years</span>()</span></code></pre></div>
+</div>
+<div id="module-information" class="section level3">
+<h3>Module information</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">sisab_info</span>()</span></code></pre></div>
+</div>
+</div>
+<div id="basic-download" class="section level2">
+<h2>Basic download</h2>
+<div id="aps-coverage-by-state-default" class="section level3">
+<h3>APS coverage by state (default)</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># APS coverage by state, January 2024</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>aps_jan <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">month =</span> <span class="dv">1</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>aps_jan</span></code></pre></div>
+</div>
+<div id="full-year" class="section level3">
+<h3>Full year</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># APS coverage, all months of 2023</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>aps_2023 <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2023</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>aps_2023</span></code></pre></div>
+</div>
+</div>
+<div id="other-report-types" class="section level2">
+<h2>Other report types</h2>
+<div id="oral-health-coverage" class="section level3">
+<h3>Oral health coverage</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>sb <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">type =</span> <span class="st">&quot;sb&quot;</span>, <span class="at">month =</span> <span class="dv">6</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>sb</span></code></pre></div>
+</div>
+<div id="community-health-agents" class="section level3">
+<h3>Community health agents</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>acs <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">type =</span> <span class="st">&quot;acs&quot;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>acs</span></code></pre></div>
+</div>
+<div id="pns-coverage" class="section level3">
+<h3>PNS coverage</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>pns <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">type =</span> <span class="st">&quot;pns&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>pns</span></code></pre></div>
+</div>
+</div>
+<div id="geographic-levels-1" class="section level2">
+<h2>Geographic levels</h2>
+<div id="national-total" class="section level3">
+<h3>National total</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>national <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">level =</span> <span class="st">&quot;brazil&quot;</span>, <span class="at">month =</span> <span class="dv">1</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>national</span></code></pre></div>
+</div>
+<div id="by-region" class="section level3">
+<h3>By region</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>regions <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">level =</span> <span class="st">&quot;region&quot;</span>, <span class="at">month =</span> <span class="dv">1</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>regions</span></code></pre></div>
+</div>
+<div id="by-state-default" class="section level3">
+<h3>By state (default)</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>states <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">level =</span> <span class="st">&quot;uf&quot;</span>, <span class="at">month =</span> <span class="dv">1</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>states</span></code></pre></div>
+</div>
+<div id="by-municipality" class="section level3">
+<h3>By municipality</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># filter by UF to avoid large downloads</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>sp_munic <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="at">year =</span> <span class="dv">2024</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="at">level =</span> <span class="st">&quot;municipality&quot;</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="at">month =</span> <span class="dv">1</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>)</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>sp_munic</span></code></pre></div>
+</div>
+</div>
+<div id="filtering-by-state-and-month" class="section level2">
+<h2>Filtering by state and month</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># single state, single month</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>sp_jan <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>, <span class="at">month =</span> <span class="dv">1</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co"># specific months</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>sp_q1 <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>, <span class="at">month =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co"># multiple years</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>sp_multi <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2022</span><span class="sc">:</span><span class="dv">2024</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>, <span class="at">month =</span> <span class="dv">6</span>)</span></code></pre></div>
+</div>
+<div id="exploring-variables" class="section level2">
+<h2>Exploring variables</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># APS variables (default)</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">sisab_variables</span>()</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co"># oral health variables</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="fu">sisab_variables</span>(<span class="at">type =</span> <span class="st">&quot;sb&quot;</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co"># community agents</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="fu">sisab_variables</span>(<span class="at">type =</span> <span class="st">&quot;acs&quot;</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co"># PNS variables</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="fu">sisab_variables</span>(<span class="at">type =</span> <span class="st">&quot;pns&quot;</span>)</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="co"># search</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="fu">sisab_variables</span>(<span class="at">search =</span> <span class="st">&quot;cobertura&quot;</span>)</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="fu">sisab_variables</span>(<span class="at">search =</span> <span class="st">&quot;equipe&quot;</span>)</span></code></pre></div>
+</div>
+<div id="example-aps-coverage-by-state" class="section level2">
+<h2>Example: APS coverage by state</h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>aps <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">level =</span> <span class="st">&quot;uf&quot;</span>, <span class="at">month =</span> <span class="dv">6</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="co"># coverage by state</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>aps <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  <span class="fu">select</span>(sgUf, qtPopulacao, qtCobertura) <span class="sc">|&gt;</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(qtCobertura))</span></code></pre></div>
+</div>
+<div id="example-coverage-trends-over-time" class="section level2">
+<h2>Example: coverage trends over time</h2>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># monthly APS coverage, national level, 2020-2024</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>trend <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>  <span class="at">year =</span> <span class="dv">2020</span><span class="sc">:</span><span class="dv">2024</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>  <span class="at">level =</span> <span class="st">&quot;brazil&quot;</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>)</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>trend <span class="sc">|&gt;</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>  <span class="fu">select</span>(year, nuComp, qtCobertura) <span class="sc">|&gt;</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>  <span class="fu">arrange</span>(year, nuComp)</span></code></pre></div>
+</div>
+<div id="example-municipal-level-analysis" class="section level2">
+<h2>Example: municipal-level analysis</h2>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># municipality-level APS coverage in Minas Gerais</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>mg_munic <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="at">year =</span> <span class="dv">2024</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  <span class="at">level =</span> <span class="st">&quot;municipality&quot;</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>  <span class="at">uf =</span> <span class="st">&quot;MG&quot;</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>  <span class="at">month =</span> <span class="dv">6</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>)</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="co"># distribution of coverage</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>mg_munic <span class="sc">|&gt;</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>    <span class="at">n_municipalities =</span> <span class="fu">n</span>(),</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>    <span class="at">mean_coverage =</span> <span class="fu">mean</span>(qtCobertura, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a>    <span class="at">median_coverage =</span> <span class="fu">median</span>(qtCobertura, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a>    <span class="at">min_coverage =</span> <span class="fu">min</span>(qtCobertura, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a>    <span class="at">max_coverage =</span> <span class="fu">max</span>(qtCobertura, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="differences-from-other-modules" class="section level2">
+<h2>Differences from other modules</h2>
+<p>SISAB has a few differences from DATASUS FTP modules (SIM, SIH, CNES,
+etc.):</p>
+<table>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>SISAB</th>
+<th>DATASUS modules</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Data source</td>
+<td>REST API</td>
+<td>FTP .dbc/.DBF files</td>
+</tr>
+<tr class="even">
+<td>Column names</td>
+<td>camelCase (from API)</td>
+<td>UPPERCASE</td>
+</tr>
+<tr class="odd">
+<td><code>lazy</code> parameter</td>
+<td>Not available</td>
+<td>Available (arrow/DuckDB)</td>
+</tr>
+<tr class="even">
+<td><code>parse</code> parameter</td>
+<td>Not available</td>
+<td>Available</td>
+</tr>
+<tr class="odd">
+<td><code>dictionary()</code></td>
+<td>Not available</td>
+<td>Available</td>
+</tr>
+<tr class="even">
+<td>Data type</td>
+<td>Aggregated coverage</td>
+<td>Microdata (individual records)</td>
+</tr>
+</tbody>
+</table>
+<p>Column names are preserved as returned by the API (e.g.,
+<code>qtCobertura</code>, <code>sgUf</code>,
+<code>noMunicipioIbge</code>). Use <code>sisab_variables()</code> to
+explore them.</p>
+</div>
+<div id="cache-management" class="section level2">
+<h2>Cache management</h2>
+<p>Downloaded data is cached locally for faster future access:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># check cache status</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">sisab_cache_status</span>()</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="co"># clear cache if needed</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="fu">sisab_clear_cache</span>()</span></code></pre></div>
+</div>
+<div id="additional-resources" class="section level2">
+<h2>Additional resources</h2>
+<ul>
+<li>SISAB reporting portal (<code>sisab.saude.gov.br</code>)</li>
+<li>relatorioaps portal (<code>relatorioaps.saude.gov.br</code>)</li>
+<li>Primary care policy (SAPS)
+(<code>www.gov.br/saude/pt-br/composicao/saps</code>)</li>
+<li><a href="censo-denominadores.html">Census vignette</a> for
+population denominators</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

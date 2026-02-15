@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Mortality Data from SIM with healthbR</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Mortality Data from SIM with healthbR</h1>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>The <strong>SIM (Sistema de Informacoes sobre Mortalidade)</strong>
+is Brazil’s national mortality information system, managed by the
+Ministry of Health through DATASUS. It records individual death
+certificates (<em>Declaracao de Obito</em>) with cause of death coded by
+ICD-10.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Coverage</td>
+<td>Per state (UF), all 27 states</td>
+</tr>
+<tr class="even">
+<td>Years</td>
+<td>1996–2024 (CID-10 era)</td>
+</tr>
+<tr class="odd">
+<td>Unit</td>
+<td>One row per death certificate</td>
+</tr>
+<tr class="even">
+<td>Format</td>
+<td>.dbc files from DATASUS FTP</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="getting-started" class="section level2">
+<h2>Getting started</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(healthbR)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<div id="check-available-years" class="section level3">
+<h3>Check available years</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">sim_years</span>()</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># include preliminary data</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">sim_years</span>(<span class="at">status =</span> <span class="st">&quot;all&quot;</span>)</span></code></pre></div>
+</div>
+<div id="module-information" class="section level3">
+<h3>Module information</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">sim_info</span>()</span></code></pre></div>
+</div>
+</div>
+<div id="downloading-data" class="section level2">
+<h2>Downloading data</h2>
+<div id="basic-download-one-state-one-year" class="section level3">
+<h3>Basic download (one state, one year)</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>deaths_ac <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span></code></pre></div>
+</div>
+<div id="multiple-states-and-years" class="section level3">
+<h3>Multiple states and years</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>deaths_se <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2020</span><span class="sc">:</span><span class="dv">2022</span>, <span class="at">uf =</span> <span class="fu">c</span>(<span class="st">&quot;SP&quot;</span>, <span class="st">&quot;RJ&quot;</span>, <span class="st">&quot;MG&quot;</span>))</span></code></pre></div>
+</div>
+<div id="all-states-default" class="section level3">
+<h3>All states (default)</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># downloads all 27 states -- may take several minutes</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>deaths_all <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>)</span></code></pre></div>
+</div>
+<div id="filter-by-cause-of-death" class="section level3">
+<h3>Filter by cause of death</h3>
+<p>Use CID-10 code prefixes to filter by cause:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Acute myocardial infarction (I21)</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>mi <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>, <span class="at">cause =</span> <span class="st">&quot;I21&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># All cardiovascular diseases (Chapter IX)</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>cardio <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>, <span class="at">cause =</span> <span class="st">&quot;I&quot;</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># All neoplasms (Chapter II)</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>cancer <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>, <span class="at">cause =</span> <span class="st">&quot;C&quot;</span>)</span></code></pre></div>
+</div>
+<div id="select-variables" class="section level3">
+<h3>Select variables</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>deaths <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="at">year =</span> <span class="dv">2022</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;CAUSABAS&quot;</span>, <span class="st">&quot;DTOBITO&quot;</span>, <span class="st">&quot;SEXO&quot;</span>, <span class="st">&quot;IDADE&quot;</span>, <span class="st">&quot;RACACOR&quot;</span>, <span class="st">&quot;CODMUNRES&quot;</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</div>
+<div id="age-decoding" class="section level2">
+<h2>Age decoding</h2>
+<p>The <code>IDADE</code> variable uses a 3-digit encoding where the
+first digit indicates the unit and the remaining two indicate the
+value:</p>
+<table>
+<thead>
+<tr class="header">
+<th>First digit</th>
+<th>Unit</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>Minutes</td>
+<td><code>005</code> = 5 minutes</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>Hours</td>
+<td><code>112</code> = 12 hours</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>Days</td>
+<td><code>215</code> = 15 days</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>Months</td>
+<td><code>306</code> = 6 months</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>Years</td>
+<td><code>445</code> = 45 years</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>100+ years</td>
+<td><code>502</code> = 102 years</td>
+</tr>
+</tbody>
+</table>
+<p>By default, <code>decode_age = TRUE</code> adds an
+<code>age_years</code> column:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>deaths <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>deaths<span class="sc">$</span>age_years  <span class="co"># numeric age in years</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co"># disable decoding</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>deaths_raw <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">decode_age =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+</div>
+<div id="key-variables" class="section level2">
+<h2>Key variables</h2>
+<table>
+<colgroup>
+<col width="43%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CAUSABAS</td>
+<td>Underlying cause of death (CID-10)</td>
+</tr>
+<tr class="even">
+<td>DTOBITO</td>
+<td>Date of death</td>
+</tr>
+<tr class="odd">
+<td>SEXO</td>
+<td>Sex (1=Male, 2=Female, 0=Unknown)</td>
+</tr>
+<tr class="even">
+<td>IDADE</td>
+<td>Age (3-digit encoded)</td>
+</tr>
+<tr class="odd">
+<td>RACACOR</td>
+<td>Race/color (1=White, 2=Black, 3=Yellow, 4=Brown, 5=Indigenous)</td>
+</tr>
+<tr class="even">
+<td>CODMUNRES</td>
+<td>Municipality of residence (IBGE 6 digits)</td>
+</tr>
+<tr class="odd">
+<td>LINHAA-D</td>
+<td>Cause of death lines A-D from the certificate</td>
+</tr>
+<tr class="even">
+<td>ESCMAE</td>
+<td>Mother’s education level</td>
+</tr>
+<tr class="odd">
+<td>ESTCIV</td>
+<td>Marital status</td>
+</tr>
+</tbody>
+</table>
+<div id="data-dictionary" class="section level3">
+<h3>Data dictionary</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">sim_dictionary</span>()</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">sim_dictionary</span>(<span class="st">&quot;SEXO&quot;</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">sim_dictionary</span>(<span class="st">&quot;RACACOR&quot;</span>)</span></code></pre></div>
+</div>
+<div id="explore-variables" class="section level3">
+<h3>Explore variables</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">sim_variables</span>()</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">sim_variables</span>(<span class="at">search =</span> <span class="st">&quot;causa&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="example-mortality-by-cause-chapter" class="section level2">
+<h2>Example: Mortality by cause chapter</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>deaths <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>deaths <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">chapter =</span> <span class="fu">substr</span>(CAUSABAS, <span class="dv">1</span>, <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="fu">count</span>(chapter, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="example-age-specific-mortality-rate" class="section level2">
+<h2>Example: Age-specific mortality rate</h2>
+<p>Combine SIM data with Census population denominators:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># deaths by age group</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>deaths <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(age_years)) <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">age_group =</span> <span class="fu">cut</span>(age_years,</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">15</span>, <span class="dv">30</span>, <span class="dv">45</span>, <span class="dv">60</span>, <span class="dv">80</span>, <span class="cn">Inf</span>),</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>    <span class="at">right =</span> <span class="cn">FALSE</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>  )) <span class="sc">|&gt;</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>  <span class="fu">count</span>(age_group, <span class="at">name =</span> <span class="st">&quot;deaths&quot;</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co"># population from Census 2022</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">censo_populacao</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">territorial_level =</span> <span class="st">&quot;state&quot;</span>, <span class="at">geo_code =</span> <span class="st">&quot;35&quot;</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co"># join and calculate rates per 100,000</span></span></code></pre></div>
+</div>
+<div id="smart-type-parsing" class="section level2">
+<h2>Smart type parsing</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># parsed types (default)</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>deaths <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">class</span>(deaths<span class="sc">$</span>DTOBITO)  <span class="co"># Date</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co"># all character (backward-compatible)</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>deaths_raw <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">parse =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+</div>
+<div id="cache-and-lazy-evaluation" class="section level2">
+<h2>Cache and lazy evaluation</h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">sim_cache_status</span>()</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">sim_clear_cache</span>()</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co"># lazy query (requires arrow)</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>lazy <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>, <span class="at">lazy =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>lazy <span class="sc">|&gt;</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>  <span class="fu">filter</span>(CAUSABAS <span class="sc">&gt;=</span> <span class="st">&quot;I20&quot;</span>, CAUSABAS <span class="sc">&lt;</span> <span class="st">&quot;I26&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div>
+</div>
+<div id="further-reading" class="section level2">
+<h2>Further reading</h2>
+<ul>
+<li>SIM on DATASUS (<code>datasus.saude.gov.br</code>)</li>
+<li><a href="sinan-notifiable-diseases.html">SINASC vignette</a> for
+live birth data</li>
+<li><a href="censo-denominadores.html">Census vignette</a> for
+population denominators</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

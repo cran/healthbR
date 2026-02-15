@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Health Surveillance Data with ANVISA</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Health Surveillance Data with ANVISA</h1>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p><strong>ANVISA (Agencia Nacional de Vigilancia Sanitaria)</strong> is
+Brazil’s health surveillance agency responsible for regulating
+medicines, health products, food, cosmetics, sanitizers, tobacco, and
+pesticides. Its open data portal provides CSV files on product
+registrations, post-market surveillance (pharmacovigilance,
+hemovigilance, technovigilance), and controlled substance sales
+(SNGPC).</p>
+<table>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Source</td>
+<td>HTTPS CSV (dados.anvisa.gov.br)</td>
+</tr>
+<tr class="even">
+<td>Data types</td>
+<td>14 (12 snapshot + 2 time-series)</td>
+</tr>
+<tr class="odd">
+<td>Snapshot types</td>
+<td>Current registry/database state</td>
+</tr>
+<tr class="even">
+<td>SNGPC types</td>
+<td>Monthly controlled substance sales (2014–2026)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="data-types" class="section level2">
+<h2>Data types</h2>
+<p>Use <code>anvisa_types()</code> to see all available types:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(healthbR)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">anvisa_types</span>()</span></code></pre></div>
+<div id="snapshot-types-12" class="section level3">
+<h3>Snapshot types (12)</h3>
+<p>These download the current snapshot of the registry or database. No
+<code>year</code> or <code>month</code> parameter is needed.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Name</th>
+<th>Category</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>medicines</strong></td>
+<td>Medicamentos</td>
+<td>Product Registration</td>
+</tr>
+<tr class="even">
+<td><strong>medical_devices</strong></td>
+<td>Produtos para Saude</td>
+<td>Product Registration</td>
+</tr>
+<tr class="odd">
+<td><strong>food</strong></td>
+<td>Alimentos</td>
+<td>Product Registration</td>
+</tr>
+<tr class="even">
+<td><strong>cosmetics</strong></td>
+<td>Cosmeticos</td>
+<td>Product Registration</td>
+</tr>
+<tr class="odd">
+<td><strong>sanitizers</strong></td>
+<td>Saneantes</td>
+<td>Product Registration</td>
+</tr>
+<tr class="even">
+<td><strong>tobacco</strong></td>
+<td>Produtos Fumigenos</td>
+<td>Product Registration</td>
+</tr>
+<tr class="odd">
+<td><strong>pesticides</strong></td>
+<td>Agrotoxicos</td>
+<td>Reference</td>
+</tr>
+<tr class="even">
+<td><strong>hemovigilance</strong></td>
+<td>Hemovigilancia</td>
+<td>Surveillance</td>
+</tr>
+<tr class="odd">
+<td><strong>technovigilance</strong></td>
+<td>Tecnovigilancia</td>
+<td>Surveillance</td>
+</tr>
+<tr class="even">
+<td><strong>vigimed_notifications</strong></td>
+<td>VigiMed Notificacoes</td>
+<td>Surveillance</td>
+</tr>
+<tr class="odd">
+<td><strong>vigimed_medicines</strong></td>
+<td>VigiMed Medicamentos</td>
+<td>Surveillance</td>
+</tr>
+<tr class="even">
+<td><strong>vigimed_reactions</strong></td>
+<td>VigiMed Reacoes</td>
+<td>Surveillance</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="time-series-types-2" class="section level3">
+<h3>Time-series types (2)</h3>
+<p>These require a <code>year</code> parameter and optionally a
+<code>month</code> parameter.</p>
+<table>
+<colgroup>
+<col width="24%" />
+<col width="24%" />
+<col width="52%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Name</th>
+<th>Availability</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>sngpc</strong></td>
+<td>SNGPC Industrializados</td>
+<td>Jan 2014 – Oct 2021, Jan 2026+</td>
+</tr>
+<tr class="even">
+<td><strong>sngpc_compounded</strong></td>
+<td>SNGPC Manipulados</td>
+<td>Jan 2014 – Oct 2021, Jan 2026+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="product-registrations" class="section level2">
+<h2>Product registrations</h2>
+<div id="medicines" class="section level3">
+<h3>Medicines</h3>
+<p>Download the complete registry of medicines approved by ANVISA:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>medicines <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;medicines&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># explore the data</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">nrow</span>(medicines)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">names</span>(medicines)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># filter active medicines</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>active <span class="ot">&lt;-</span> medicines <span class="sc">|&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="fu">filter</span>(SITUACAO_REGISTRO <span class="sc">==</span> <span class="st">&quot;ATIVO&quot;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co"># count by therapeutic class</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>active <span class="sc">|&gt;</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  <span class="fu">count</span>(CLASSE_TERAPEUTICA, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="medical-devices" class="section level3">
+<h3>Medical devices</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>devices <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;medical_devices&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># count by risk class</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>devices <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="fu">count</span>(CLASSE_RISCO, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="food-and-cosmetics" class="section level3">
+<h3>Food and cosmetics</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>food <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;food&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>cosmetics <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;cosmetics&quot;</span>)</span></code></pre></div>
+</div>
+<div id="select-specific-variables" class="section level3">
+<h3>Select specific variables</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># only keep product name and active ingredient</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>med_slim <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;medicines&quot;</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;NOME_PRODUTO&quot;</span>, <span class="st">&quot;PRINCIPIO_ATIVO&quot;</span>, <span class="st">&quot;SITUACAO_REGISTRO&quot;</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</div>
+<div id="pesticides" class="section level2">
+<h2>Pesticides</h2>
+<p>Pesticide monographs list authorized active ingredients and their
+maximum residue limits (LMR):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>pesticides <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;pesticides&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co"># search for a specific substance</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">anvisa_variables</span>(<span class="at">type =</span> <span class="st">&quot;pesticides&quot;</span>, <span class="at">search =</span> <span class="st">&quot;substancia&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co"># substances authorized for coffee</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>coffee <span class="ot">&lt;-</span> pesticides <span class="sc">|&gt;</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="fu">filter</span>(NO_CULTURA <span class="sc">==</span> <span class="st">&quot;Cafe&quot;</span>)</span></code></pre></div>
+</div>
+<div id="post-market-surveillance" class="section level2">
+<h2>Post-market surveillance</h2>
+<div id="hemovigilance" class="section level3">
+<h3>Hemovigilance</h3>
+<p>Adverse events related to blood transfusions:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>hemo <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;hemovigilance&quot;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># count by reaction type</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>hemo <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="fu">count</span>(TIPO_REACAO_TRANSFUSIONAL, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># count by state</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>hemo <span class="sc">|&gt;</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="fu">count</span>(UF_NOTIFICACAO, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="technovigilance" class="section level3">
+<h3>Technovigilance</h3>
+<p>Adverse events related to medical devices:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>techno <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;technovigilance&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># count by notification type</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>techno <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">count</span>(TIPO_NOTIFICACAO, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="pharmacovigilance-vigimed" class="section level3">
+<h3>Pharmacovigilance (VigiMed)</h3>
+<p>Drug/vaccine adverse event reports are split into three linked
+datasets sharing the <code>IDENTIFICACAO_NOTIFICACAO</code> key:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># notifications (patient info + event summary)</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>notif <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;vigimed_notifications&quot;</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co"># medicines involved</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>meds <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;vigimed_medicines&quot;</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co"># adverse reactions (MedDRA coded)</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>reactions <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;vigimed_reactions&quot;</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co"># link notifications to reactions</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>linked <span class="ot">&lt;-</span> notif <span class="sc">|&gt;</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="fu">select</span>(IDENTIFICACAO_NOTIFICACAO, SEXO, IDADE_MOMENTO_REACAO, GRAVE) <span class="sc">|&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="fu">inner_join</span>(reactions, <span class="at">by =</span> <span class="st">&quot;IDENTIFICACAO_NOTIFICACAO&quot;</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co"># most common reactions</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>linked <span class="sc">|&gt;</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  <span class="fu">count</span>(PT, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">20</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="sngpc-controlled-substance-sales" class="section level2">
+<h2>SNGPC – Controlled substance sales</h2>
+<p>The SNGPC (Sistema Nacional de Gerenciamento de Produtos Controlados)
+tracks sales of controlled substances (psychotropics, narcotics) by
+pharmacies across Brazil.</p>
+<div id="industrialized-medicines" class="section level3">
+<h3>Industrialized medicines</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># download January 2020 data</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>sngpc_jan <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;sngpc&quot;</span>, <span class="at">year =</span> <span class="dv">2020</span>, <span class="at">month =</span> <span class="dv">1</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co"># top prescribed controlled substances</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>sngpc_jan <span class="sc">|&gt;</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="fu">count</span>(DS_PRINCIPIO_ATIVO, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co"># sales by state</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>sngpc_jan <span class="sc">|&gt;</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="fu">count</span>(SG_UF_VENDA, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="multiple-months" class="section level3">
+<h3>Multiple months</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># download Q1 2020 (Jan-Mar)</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>sngpc_q1 <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;sngpc&quot;</span>, <span class="at">year =</span> <span class="dv">2020</span>, <span class="at">month =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># monthly trend</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>sngpc_q1 <span class="sc">|&gt;</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="fu">count</span>(month, <span class="at">name =</span> <span class="st">&quot;sales&quot;</span>)</span></code></pre></div>
+</div>
+<div id="compounded-medicines" class="section level3">
+<h3>Compounded medicines</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># compounded (manipulated) controlled substances</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>manip <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;sngpc_compounded&quot;</span>, <span class="at">year =</span> <span class="dv">2020</span>, <span class="at">month =</span> <span class="dv">1</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co"># most common active ingredients</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>manip <span class="sc">|&gt;</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="fu">count</span>(NO_PRINCIPIO_ATIVO, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>)</span></code></pre></div>
+</div>
+<div id="lazy-evaluation-for-large-queries" class="section level3">
+<h3>Lazy evaluation for large queries</h3>
+<p>For large SNGPC queries spanning many months, use lazy evaluation to
+defer computation:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># lazy query (requires arrow package)</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>lazy_sngpc <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;sngpc&quot;</span>, <span class="at">year =</span> <span class="dv">2020</span>, <span class="at">month =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">lazy =</span> <span class="cn">TRUE</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co"># filter and collect only what you need</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>result <span class="ot">&lt;-</span> lazy_sngpc <span class="sc">|&gt;</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="fu">filter</span>(SG_UF_VENDA <span class="sc">==</span> <span class="st">&quot;SP&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div>
+</div>
+</div>
+<div id="exploring-variables" class="section level2">
+<h2>Exploring variables</h2>
+<p>Use <code>anvisa_variables()</code> to see available variables for
+any type:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># all medicines variables</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">anvisa_variables</span>(<span class="at">type =</span> <span class="st">&quot;medicines&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co"># search across descriptions</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="fu">anvisa_variables</span>(<span class="at">type =</span> <span class="st">&quot;hemovigilance&quot;</span>, <span class="at">search =</span> <span class="st">&quot;paciente&quot;</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co"># SNGPC variables</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="fu">anvisa_variables</span>(<span class="at">type =</span> <span class="st">&quot;sngpc&quot;</span>)</span></code></pre></div>
+</div>
+<div id="caching" class="section level2">
+<h2>Caching</h2>
+<p>Downloaded data is cached locally for faster subsequent access:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># check cache status</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">anvisa_cache_status</span>()</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co"># clear all cached ANVISA data</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="fu">anvisa_clear_cache</span>()</span></code></pre></div>
+</div>
+<div id="module-information" class="section level2">
+<h2>Module information</h2>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># full module overview</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">anvisa_info</span>()</span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

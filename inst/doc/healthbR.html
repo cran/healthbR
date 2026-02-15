@@ -343,206 +343,441 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<p>The healthbR package provides easy access to Brazilian public health
-survey data directly from R. It downloads, caches, and processes data
-from official Ministry of Health sources, returning clean,
-analysis-ready tibbles that follow tidyverse conventions.</p>
-<p>Currently, healthbR supports <strong>VIGITEL</strong> (Vigilância de
-Fatores de Risco e Proteção para Doenças Crônicas por Inquérito
-Telefônico), a telephone-based survey that monitors risk and protective
-factors for chronic diseases in Brazilian state capitals.</p>
+<p>healthbR provides easy access to Brazilian public health data
+directly from R. The package downloads, caches, and processes data from
+official sources (Ministry of Health, IBGE, DATASUS), returning clean,
+analysis-ready tibbles following tidyverse conventions.</p>
+<p>The package currently supports <strong>13 data sources</strong>
+organized in two groups:</p>
+<p><strong>Surveys (IBGE / Ministry of Health)</strong></p>
+<table>
+<colgroup>
+<col width="34%" />
+<col width="34%" />
+<col width="30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Source</th>
+<th>Years</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>VIGITEL</td>
+<td>Telephone survey on chronic disease risk factors</td>
+<td>2006–2024</td>
+</tr>
+<tr class="even">
+<td>PNS</td>
+<td>National Health Survey (microdata + SIDRA API)</td>
+<td>2013, 2019</td>
+</tr>
+<tr class="odd">
+<td>PNAD Continua</td>
+<td>Continuous household survey (health supplements)</td>
+<td>2012–2024</td>
+</tr>
+<tr class="even">
+<td>POF</td>
+<td>Household budget survey (food security, nutrition)</td>
+<td>2002–2018</td>
+</tr>
+<tr class="odd">
+<td>Censo</td>
+<td>Population denominators via SIDRA API</td>
+<td>1970–2022</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DATASUS (Ministry of Health FTP)</strong></p>
+<table>
+<colgroup>
+<col width="22%" />
+<col width="22%" />
+<col width="36%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Source</th>
+<th>Granularity</th>
+<th>Years</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>SIM</td>
+<td>Mortality (death certificates)</td>
+<td>Annual/UF</td>
+<td>1996–2024</td>
+</tr>
+<tr class="even">
+<td>SINASC</td>
+<td>Live births</td>
+<td>Annual/UF</td>
+<td>1996–2024</td>
+</tr>
+<tr class="odd">
+<td>SIH</td>
+<td>Hospital admissions (AIH)</td>
+<td>Monthly/UF</td>
+<td>2008–2024</td>
+</tr>
+<tr class="even">
+<td>SIA</td>
+<td>Outpatient procedures (13 file types)</td>
+<td>Monthly/UF</td>
+<td>2008–2024</td>
+</tr>
+<tr class="odd">
+<td>SINAN</td>
+<td>Notifiable diseases (31 diseases)</td>
+<td>Annual/National</td>
+<td>2007–2024</td>
+</tr>
+<tr class="even">
+<td>CNES</td>
+<td>Health facility registry (13 file types)</td>
+<td>Monthly/UF</td>
+<td>2005–2024</td>
+</tr>
+<tr class="odd">
+<td>SI-PNI</td>
+<td>Vaccination (aggregated FTP + microdata API)</td>
+<td>Annual/UF</td>
+<td>1994–2025</td>
+</tr>
+<tr class="even">
+<td>SISAB</td>
+<td>Primary care coverage indicators (REST API)</td>
+<td>Monthly</td>
+<td>2007–present</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="getting-started" class="section level2">
 <h2>Getting started</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(healthbR)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
-<div id="check-available-data" class="section level3">
-<h3>Check available data</h3>
-<p>Before downloading data, you can check which years are available:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">vigitel_years</span>()</span></code></pre></div>
+<p>To see all available data sources at a glance:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">list_sources</span>()</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 13 x 5</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt;    source  name                         description                    years       status</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;   &lt;chr&gt;                        &lt;chr&gt;                          &lt;chr&gt;       &lt;chr&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt;  1 vigitel VIGITEL                      Telephone survey on chronic... 2006-2024   available</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt;  2 pns     PNS - Pesquisa Nacional ...  National health survey (IBGE) 2013, 2019  available</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;  ...</span></span></code></pre></div>
+<p>All modules follow a consistent API pattern:</p>
+<ul>
+<li><code>*_years()</code> / <code>*_info()</code> – metadata and
+available years</li>
+<li><code>*_variables()</code> / <code>*_dictionary()</code> – variable
+names and category labels</li>
+<li><code>*_data()</code> – download and load data</li>
+<li><code>*_cache_status()</code> / <code>*_clear_cache()</code> – cache
+management</li>
+</ul>
 </div>
-<div id="download-and-load-data" class="section level3">
-<h3>Download and load data</h3>
-<p>The main function for accessing VIGITEL data is
-<code>vigitel_data()</code>:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># load a single year</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">vigitel_data</span>(<span class="dv">2023</span>)</span>
+<div id="vigitel-chronic-disease-risk-factors" class="section level2">
+<h2>VIGITEL – Chronic disease risk factors</h2>
+<p>VIGITEL is a telephone survey conducted annually in all 27 state
+capitals, monitoring risk and protective factors for chronic
+non-communicable diseases.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># check available years</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">vigitel_years</span>()</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># load multiple years</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">vigitel_data</span>(<span class="dv">2021</span><span class="sc">:</span><span class="dv">2023</span>)</span></code></pre></div>
-<p>Data is automatically cached locally, so subsequent calls for the
-same year load instantly without re-downloading.</p>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># download data for a single year</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">vigitel_data</span>(<span class="at">year =</span> <span class="dv">2024</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># explore the data dictionary</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>dict <span class="ot">&lt;-</span> <span class="fu">vigitel_dictionary</span>()</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># list variables</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">vigitel_variables</span>()</span></code></pre></div>
+<p>Key variables include <code>pesorake</code> (survey weight),
+<code>diab</code> (diabetes), <code>hart</code> (hypertension),
+<code>fumante</code> (smoker), and <code>imc</code> (BMI).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># weighted prevalence of diabetes by city using srvyr</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">library</span>(srvyr)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>df <span class="sc">|&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="fu">as_survey_design</span>(<span class="at">weights =</span> pesorake) <span class="sc">|&gt;</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="fu">group_by</span>(cidade) <span class="sc">|&gt;</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>    <span class="at">prevalence =</span> <span class="fu">survey_mean</span>(diab <span class="sc">==</span> <span class="dv">1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">unweighted</span>(<span class="fu">n</span>())</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  )</span></code></pre></div>
 </div>
+<div id="pns-national-health-survey" class="section level2">
+<h2>PNS – National Health Survey</h2>
+<p>The PNS provides comprehensive data on health conditions, lifestyle,
+and healthcare access from ~100,000 households.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># microdata</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>pns <span class="ot">&lt;-</span> <span class="fu">pns_data</span>(<span class="at">year =</span> <span class="dv">2019</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># explore modules and variables</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="fu">pns_modules</span>(<span class="at">year =</span> <span class="dv">2019</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">pns_dictionary</span>(<span class="at">year =</span> <span class="dv">2019</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co"># tabulated indicators from SIDRA API (no download needed)</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">pns_sidra_search</span>(<span class="st">&quot;diabetes&quot;</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">pns_sidra_data</span>(<span class="at">table =</span> <span class="dv">4487</span>, <span class="at">territorial_level =</span> <span class="st">&quot;state&quot;</span>, <span class="at">year =</span> <span class="dv">2019</span>)</span></code></pre></div>
 </div>
-<div id="understanding-the-data" class="section level2">
-<h2>Understanding the data</h2>
-<div id="variable-dictionary" class="section level3">
-<h3>Variable dictionary</h3>
-<p>VIGITEL uses coded variable names (q6, q8, etc.). Use the dictionary
-to understand what each variable represents:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>dict <span class="ot">&lt;-</span> <span class="fu">vigitel_dictionary</span>()</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>dict</span></code></pre></div>
-<p>You can search for specific variables:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># find weight-related variables</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>dict <span class="sc">|&gt;</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="fu">filter</span>(stringr<span class="sc">::</span><span class="fu">str_detect</span>(variable_name, <span class="st">&quot;peso&quot;</span>))</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co"># find diabetes-related variables</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>dict <span class="sc">|&gt;</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="fu">filter</span>(stringr<span class="sc">::</span><span class="fu">str_detect</span>(variable_name, <span class="st">&quot;diab&quot;</span>))</span></code></pre></div>
+<div id="pnad-continua-household-survey-supplements" class="section level2">
+<h2>PNAD Continua – Household survey supplements</h2>
+<p>PNAD Continua includes health-related supplementary modules on
+disability, housing conditions, primary health care (APS), and household
+characteristics.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># list available modules</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">pnadc_modules</span>()</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co"># download disability supplement</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>defic <span class="ot">&lt;-</span> <span class="fu">pnadc_data</span>(<span class="at">module =</span> <span class="st">&quot;deficiencia&quot;</span>, <span class="at">year =</span> <span class="dv">2019</span>, <span class="at">quarter =</span> <span class="dv">1</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co"># explore variables</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="fu">pnadc_variables</span>(<span class="at">module =</span> <span class="st">&quot;deficiencia&quot;</span>)</span></code></pre></div>
 </div>
-<div id="list-variables-for-a-specific-year" class="section level3">
-<h3>List variables for a specific year</h3>
-<p>Variables may change between survey years. Check which variables are
-available:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">vigitel_variables</span>(<span class="dv">2023</span>)</span></code></pre></div>
-</div>
-</div>
-<div id="survey-analysis" class="section level2">
-<h2>Survey analysis</h2>
-<p>VIGITEL uses complex survey sampling with post-stratification
-weights. For proper statistical inference, always use the
-<code>pesorake</code> weight variable.</p>
-<div id="using-srvyr-for-weighted-analysis" class="section level3">
-<h3>Using srvyr for weighted analysis</h3>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">library</span>(srvyr)</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># create survey design object</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>vigitel_svy <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="fu">as_survey_design</span>(<span class="at">weights =</span> pesorake)</span>
+<div id="pof-food-security-and-nutrition" class="section level2">
+<h2>POF – Food security and nutrition</h2>
+<p>The POF (Household Budget Survey) contains data on food insecurity
+(EBIA), individual food consumption, anthropometry, and health
+expenses.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># list available registers</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">pof_registers</span>(<span class="at">year =</span> <span class="dv">2018</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># food consumption microdata</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>consumo <span class="ot">&lt;-</span> <span class="fu">pof_data</span>(<span class="at">year =</span> <span class="dv">2018</span>, <span class="at">register =</span> <span class="st">&quot;consumo_alimentar&quot;</span>)</span>
 <span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># calculate weighted prevalence of diabetes by city</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>vigitel_svy <span class="sc">|&gt;</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="fu">group_by</span>(cidade) <span class="sc">|&gt;</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>    <span class="at">prevalence =</span> <span class="fu">survey_mean</span>(diab <span class="sc">==</span> <span class="dv">1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">unweighted</span>(<span class="fu">n</span>())</span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  )</span></code></pre></div>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># food insecurity scale (EBIA)</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>morador <span class="ot">&lt;-</span> <span class="fu">pof_data</span>(<span class="at">year =</span> <span class="dv">2018</span>, <span class="at">register =</span> <span class="st">&quot;morador&quot;</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co"># variable dictionary for a specific register</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="fu">pof_dictionary</span>(<span class="at">year =</span> <span class="dv">2018</span>, <span class="at">register =</span> <span class="st">&quot;morador&quot;</span>)</span></code></pre></div>
+<p>See <code>vignette(&quot;pof-health-data&quot;)</code> for a detailed
+walkthrough.</p>
 </div>
-<div id="key-variables" class="section level3">
-<h3>Key variables</h3>
-<p>Some commonly used variables in VIGITEL:</p>
-<table>
-<thead>
-<tr class="header">
-<th>Variable</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>cidade</code></td>
-<td>City code (1-27 for state capitals)</td>
-</tr>
-<tr class="even">
-<td><code>q6</code></td>
-<td>Sex</td>
-</tr>
-<tr class="odd">
-<td><code>q8_anos</code></td>
-<td>Age in years</td>
-</tr>
-<tr class="even">
-<td><code>pesorake</code></td>
-<td>Post-stratification weight</td>
-</tr>
-<tr class="odd">
-<td><code>diab</code></td>
-<td>Diabetes diagnosis</td>
-</tr>
-<tr class="even">
-<td><code>hart</code></td>
-<td>Hypertension diagnosis</td>
-</tr>
-<tr class="odd">
-<td><code>fumante</code></td>
-<td>Current smoker</td>
-</tr>
-<tr class="even">
-<td><code>imc</code></td>
-<td>Body Mass Index</td>
-</tr>
-<tr class="odd">
-<td><code>obesid</code></td>
-<td>Obesity indicator</td>
-</tr>
-</tbody>
-</table>
-<p>Consult <code>vigitel_dictionary()</code> for the complete list.</p>
-</div>
-</div>
-<div id="performance-optimization" class="section level2">
-<h2>Performance optimization</h2>
-<p>healthbR offers three strategies for working with large datasets
-efficiently.</p>
-<div id="section" class="section level3">
-<h3>1</h3>
-<p>. Parquet conversion</p>
-<p>Convert Excel files to Parquet format for dramatically faster loading
-(10-20x improvement):</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># one-time conversion</span></span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">vigitel_convert_to_parquet</span>(<span class="dv">2015</span><span class="sc">:</span><span class="dv">2023</span>)</span>
+<div id="censo-population-denominators" class="section level2">
+<h2>Censo – Population denominators</h2>
+<p>The Census module queries the IBGE SIDRA API for population
+denominators, essential for calculating mortality rates, incidence, and
+other epidemiological indicators.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># population by state, sex, and age group (2022 Census)</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">censo_populacao</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">territorial_level =</span> <span class="st">&quot;state&quot;</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co"># subsequent loads use parquet automatically</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">vigitel_data</span>(<span class="dv">2015</span><span class="sc">:</span><span class="dv">2023</span>)</span></code></pre></div>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co"># intercensitary population estimates (for years between censuses)</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>est <span class="ot">&lt;-</span> <span class="fu">censo_estimativa</span>(<span class="at">year =</span> <span class="dv">2020</span>, <span class="at">territorial_level =</span> <span class="st">&quot;state&quot;</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co"># query any Census SIDRA table directly</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="fu">censo_sidra_search</span>(<span class="st">&quot;populacao&quot;</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="fu">censo_sidra_data</span>(<span class="at">table =</span> <span class="dv">9514</span>, <span class="at">territorial_level =</span> <span class="st">&quot;brazil&quot;</span>, <span class="at">year =</span> <span class="dv">2022</span>)</span></code></pre></div>
+<p>See <code>vignette(&quot;censo-denominadores&quot;)</code> for epidemiological
+examples.</p>
 </div>
-<div id="parallel-downloads" class="section level3">
-<h3>2. Parallel downloads</h3>
-<p>When downloading multiple years, healthbR automatically uses parallel
-processing if the <code>furrr</code> package is available:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># downloads happen in parallel (2-4 workers)</span></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">vigitel_data</span>(<span class="dv">2015</span><span class="sc">:</span><span class="dv">2023</span>)</span></code></pre></div>
+<div id="sim-mortality-data" class="section level2">
+<h2>SIM – Mortality data</h2>
+<p>SIM contains individual death records from death certificates
+(CID-10, 1996+).</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># deaths in Acre, 2022</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>obitos <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co"># filter by cause of death (CID-10 prefix)</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>obitos_cardio <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">cause =</span> <span class="st">&quot;I&quot;</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co"># explore variables and categories</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="fu">sim_variables</span>()</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="fu">sim_dictionary</span>(<span class="st">&quot;CAUSABAS&quot;</span>)</span></code></pre></div>
 </div>
-<div id="lazy-evaluation-with-arrow" class="section level3">
-<h3>3. Lazy evaluation with Arrow</h3>
-<p>For very large datasets, use lazy evaluation to filter and select
-data before loading into memory:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># returns Arrow Dataset (not loaded into RAM)</span></span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>df_lazy <span class="ot">&lt;-</span> <span class="fu">vigitel_data</span>(<span class="dv">2015</span><span class="sc">:</span><span class="dv">2023</span>, <span class="at">lazy =</span> <span class="cn">TRUE</span>)</span>
+<div id="sinasc-live-births" class="section level2">
+<h2>SINASC – Live births</h2>
+<p>SINASC contains individual birth records including birth weight,
+gestational age, prenatal care, and congenital anomalies.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># births in Acre, 2022</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>nascimentos <span class="ot">&lt;-</span> <span class="fu">sinasc_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co"># operations are executed lazily</span></span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>result <span class="ot">&lt;-</span> df_lazy <span class="sc">|&gt;</span></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="fu">filter</span>(cidade <span class="sc">==</span> <span class="dv">1</span>, q8_anos <span class="sc">&gt;=</span> <span class="dv">18</span>) <span class="sc">|&gt;</span></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="fu">select</span>(q6, q8_anos, pesorake, diab, hart, imc) <span class="sc">|&gt;</span></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  <span class="fu">collect</span>()  </span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co"># only now data is loaded</span></span></code></pre></div>
-<p>This approach is especially useful when you only need a subset of the
-data.</p>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co"># filter by congenital anomaly (CID-10 prefix)</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>anomalias <span class="ot">&lt;-</span> <span class="fu">sinasc_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">anomaly =</span> <span class="st">&quot;Q&quot;</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="fu">sinasc_variables</span>()</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="fu">sinasc_dictionary</span>(<span class="st">&quot;PARTO&quot;</span>)</span></code></pre></div>
 </div>
+<div id="sih-hospital-admissions" class="section level2">
+<h2>SIH – Hospital admissions</h2>
+<p>SIH contains hospital admission records (AIH) with diagnosis,
+procedures, length of stay, and costs. Data is organized monthly.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># admissions in Acre, January 2022</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>internacoes <span class="ot">&lt;-</span> <span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># filter by principal diagnosis (CID-10 prefix)</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>intern_resp <span class="ot">&lt;-</span> <span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">diagnosis =</span> <span class="st">&quot;J&quot;</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="fu">sih_variables</span>()</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="fu">sih_dictionary</span>(<span class="st">&quot;DIAG_PRINC&quot;</span>)</span></code></pre></div>
 </div>
-<div id="workflow-example" class="section level2">
-<h2>Workflow example</h2>
-<p>Here’s a complete workflow for analyzing diabetes prevalence:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">library</span>(healthbR)</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="fu">library</span>(srvyr)</span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co"># 1. load data</span></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">vigitel_data</span>(<span class="dv">2023</span>)</span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a></span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co"># 2. create survey design</span></span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>svy <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>  <span class="fu">as_survey_design</span>(<span class="at">weights =</span> pesorake)</span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a></span>
-<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co"># 3. calculate prevalence by sex</span></span>
-<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>diabetes_by_sex <span class="ot">&lt;-</span> svy <span class="sc">|&gt;</span></span>
-<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>  <span class="fu">group_by</span>(q6) <span class="sc">|&gt;</span></span>
-<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
-<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>    <span class="at">prevalence =</span> <span class="fu">survey_mean</span>(diab <span class="sc">==</span> <span class="dv">1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>, <span class="at">vartype =</span> <span class="st">&quot;ci&quot;</span>),</span>
-<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">unweighted</span>(<span class="fu">n</span>())</span>
-<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>  )</span>
-<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a></span>
-<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>diabetes_by_sex</span></code></pre></div>
+<div id="sia-outpatient-procedures" class="section level2">
+<h2>SIA – Outpatient procedures</h2>
+<p>SIA covers outpatient production data with 13 file types (BPA, APAC,
+RAAS).</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># outpatient production in Acre, January 2022 (default type: PA)</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>ambulatorial <span class="ot">&lt;-</span> <span class="fu">sia_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co"># high-cost medications (APAC)</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>medicamentos <span class="ot">&lt;-</span> <span class="fu">sia_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">type =</span> <span class="st">&quot;AM&quot;</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co"># filter by procedure or diagnosis</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="fu">sia_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">procedure =</span> <span class="st">&quot;0301&quot;</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="fu">sia_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">diagnosis =</span> <span class="st">&quot;E11&quot;</span>)</span></code></pre></div>
+</div>
+<div id="sinan-notifiable-diseases" class="section level2">
+<h2>SINAN – Notifiable diseases</h2>
+<p>SINAN contains individual notification records for 31 notifiable
+diseases including dengue, tuberculosis, chikungunya, zika, hepatitis,
+syphilis, and others. Files are <strong>national</strong> (not
+per-state), so each download covers all of Brazil for a given disease
+and year.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># list available diseases</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">sinan_diseases</span>()</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co"># search for a specific disease</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="fu">sinan_diseases</span>(<span class="at">search =</span> <span class="st">&quot;dengue&quot;</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co"># dengue notifications, 2022</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>dengue <span class="ot">&lt;-</span> <span class="fu">sinan_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">disease =</span> <span class="st">&quot;DENG&quot;</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co"># tuberculosis, 2020-2022</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>tb <span class="ot">&lt;-</span> <span class="fu">sinan_data</span>(<span class="at">year =</span> <span class="dv">2020</span><span class="sc">:</span><span class="dv">2022</span>, <span class="at">disease =</span> <span class="st">&quot;TUBE&quot;</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co"># explore variables and categories</span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a><span class="fu">sinan_variables</span>()</span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="fu">sinan_dictionary</span>(<span class="st">&quot;EVOLUCAO&quot;</span>)</span></code></pre></div>
+<p>Since SINAN files are national, filter by state after download using
+<code>SG_UF_NOT</code> (UF of notification) or <code>ID_MUNICIP</code>
+(municipality code):</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>dengue <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="fu">filter</span>(SG_UF_NOT <span class="sc">==</span> <span class="st">&quot;35&quot;</span>)  <span class="co"># Sao Paulo</span></span></code></pre></div>
+</div>
+<div id="cnes-health-facility-registry" class="section level2">
+<h2>CNES – Health facility registry</h2>
+<p>CNES is the national registry of health facilities, covering
+hospitals, clinics, primary care units, and all other health
+establishments. Data is organized monthly with 13 file types.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># see all file types</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">cnes_info</span>()</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co"># establishments in Acre, January 2023</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>estab <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co"># hospital beds</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>leitos <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">type =</span> <span class="st">&quot;LT&quot;</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co"># health professionals</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>prof <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">type =</span> <span class="st">&quot;PF&quot;</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co"># explore variables and categories</span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="fu">cnes_variables</span>()</span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="fu">cnes_dictionary</span>(<span class="st">&quot;TP_UNID&quot;</span>)</span></code></pre></div>
+<p>See <code>vignette(&quot;datasus-modules&quot;)</code> for cross-module
+analysis examples.</p>
+</div>
+<div id="si-pni-vaccination-data" class="section level2">
+<h2>SI-PNI – Vaccination data</h2>
+<p>SI-PNI data comes from two sources: <strong>FTP</strong> (1994–2019)
+with aggregated dose counts and coverage rates, and the
+<strong>OpenDataSUS API</strong> (2020–2025) with individual-level
+microdata (one row per vaccination dose). <code>sipni_data()</code>
+routes transparently based on the requested year.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># module overview</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">sipni_info</span>()</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co"># FTP: doses applied in Acre, 2019 (aggregated)</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>doses <span class="ot">&lt;-</span> <span class="fu">sipni_data</span>(<span class="at">year =</span> <span class="dv">2019</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co"># FTP: vaccination coverage</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>cobertura <span class="ot">&lt;-</span> <span class="fu">sipni_data</span>(<span class="at">year =</span> <span class="dv">2019</span>, <span class="at">type =</span> <span class="st">&quot;CPNI&quot;</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co"># API: microdata for Acre, January 2024</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>micro <span class="ot">&lt;-</span> <span class="fu">sipni_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">month =</span> <span class="dv">1</span>)</span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co"># explore variables for each data source</span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="fu">sipni_variables</span>()                  <span class="co"># FTP DPNI variables</span></span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="fu">sipni_variables</span>(<span class="at">type =</span> <span class="st">&quot;API&quot;</span>)      <span class="co"># API microdata variables</span></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="fu">sipni_dictionary</span>(<span class="st">&quot;IMUNO&quot;</span>)          <span class="co"># FTP dictionary</span></span></code></pre></div>
+</div>
+<div id="sisab-primary-care-coverage" class="section level2">
+<h2>SISAB – Primary care coverage</h2>
+<p>SISAB provides aggregated coverage indicators for primary care
+(Atencao Primaria) via a public REST API. Unlike other DATASUS modules,
+no FTP download or .dbc decompression is needed.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># module overview</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">sisab_info</span>()</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co"># APS coverage by state, January 2024</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>cobertura <span class="ot">&lt;-</span> <span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">month =</span> <span class="dv">1</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="co"># national total, full year 2023</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">level =</span> <span class="st">&quot;brazil&quot;</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co"># oral health coverage</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">type =</span> <span class="st">&quot;sb&quot;</span>, <span class="at">month =</span> <span class="dv">6</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a><span class="co"># municipality level for Sao Paulo</span></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a><span class="fu">sisab_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">level =</span> <span class="st">&quot;municipality&quot;</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>, <span class="at">month =</span> <span class="dv">1</span>)</span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a><span class="co"># explore variables</span></span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a><span class="fu">sisab_variables</span>()</span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a><span class="fu">sisab_variables</span>(<span class="at">type =</span> <span class="st">&quot;sb&quot;</span>)</span></code></pre></div>
+</div>
+<div id="caching" class="section level2">
+<h2>Caching</h2>
+<p>All modules cache downloaded data automatically to avoid repeated
+downloads. Install <code>arrow</code> for optimized Parquet caching
+(recommended):</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;arrow&quot;</span>)</span></code></pre></div>
+<p>Cache management works the same across all modules:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># check what is cached</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">sim_cache_status</span>()</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="fu">vigitel_cache_status</span>()</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co"># clear a module&#39;s cache</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="fu">sim_clear_cache</span>()</span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="co"># use a custom cache directory (e.g., for temporary use)</span></span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">cache_dir =</span> <span class="fu">tempdir</span>())</span></code></pre></div>
+</div>
+<div id="combining-modules" class="section level2">
+<h2>Combining modules</h2>
+<p>healthbR’s real power comes from combining data across modules. For
+example, calculating mortality rates requires deaths (SIM) and
+population (Censo):</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="co"># deaths by state</span></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>deaths <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>  <span class="fu">count</span>(<span class="at">name =</span> <span class="st">&quot;deaths&quot;</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="co"># population by state</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">censo_populacao</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">territorial_level =</span> <span class="st">&quot;state&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>  <span class="fu">filter</span>(nivel_territorial_codigo <span class="sc">==</span> <span class="st">&quot;12&quot;</span>)  <span class="co"># Acre</span></span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a></span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a><span class="co"># crude mortality rate</span></span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>deaths<span class="sc">$</span>deaths <span class="sc">/</span> pop<span class="sc">$</span>valor <span class="sc">*</span> <span class="dv">100000</span></span></code></pre></div>
 </div>
 <div id="additional-resources" class="section level2">
 <h2>Additional resources</h2>
 <ul>
-<li><a href="https://www.gov.br/saude/pt-br/composicao/svsa/inqueritos-de-saude/vigitel">VIGITEL
-official page</a></li>
-<li><a href="https://svs.aids.gov.br/download/Vigitel/">VIGITEL
-methodology</a></li>
-<li><a href="https://cran.r-project.org/package=srvyr">srvyr package
-documentation</a></li>
+<li><code>vignette(&quot;pof-health-data&quot;)</code> – Analyzing food security
+and nutrition from POF</li>
+<li><code>vignette(&quot;censo-denominadores&quot;)</code> – Population
+denominators for epidemiology</li>
+<li><code>vignette(&quot;datasus-modules&quot;)</code> – SIM, SINASC, SIH, SIA,
+SINAN, and CNES in depth</li>
+<li><a href="https://sidneybissoli.github.io/healthbR/">Package
+website</a></li>
+<li><a href="https://github.com/SidneyBissoli/healthbR">GitHub
+repository</a></li>
 </ul>
 </div>
 

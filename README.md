@@ -3,22 +3,33 @@
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN status](https://www.r-pkg.org/badges/version/healthbR)](https://CRAN.R-project.org/package=healthbR)
 [![R-CMD-check](https://github.com/SidneyBissoli/healthbR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/SidneyBissoli/healthbR/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/SidneyBissoli/healthbR/graph/badge.svg)](https://app.codecov.io/gh/SidneyBissoli/healthbR)
 <!-- badges: end -->
 
 ## Overview
-healthbR provides easy access to Brazilian public health survey data directly from R. The package downloads, caches, and processes data from official sources, returning clean, analysis-ready tibbles following tidyverse conventions.
- 
-Currently supported data sources:
 
-- **VIGITEL** - Surveillance of Risk Factors for Chronic Diseases by Telephone Survey (Vigilância de Fatores de Risco e Proteção para Doenças Crônicas por Inquérito Telefônico)
+healthbR provides easy access to Brazilian public health data directly from R. The package downloads, caches, and processes data from official sources, returning clean, analysis-ready tibbles following tidyverse conventions.
 
-Planned for future releases:
+### Surveys (IBGE / Ministry of Health)
 
-- PNS (National Health Survey)
-- PNAD (National Household Sample Survey)
-- SIM (Mortality Information System)
-- SINASC (Live Birth Information System)
-- SIH (Hospital Information System)
+| Module | Description | Years |
+|--------|-------------|-------|
+| **VIGITEL** | Surveillance of Risk Factors for Chronic Diseases by Telephone Survey | 2006--2024 |
+| **PNS** | National Health Survey (microdata + SIDRA API) | 2013, 2019 |
+| **PNAD Continua** | Continuous National Household Sample Survey | 2012--2024 |
+| **POF** | Household Budget Survey (food security, consumption, anthropometry) | 2002--2018 |
+| **Censo** | Population denominators via SIDRA API | 1970--2022 |
+
+### DATASUS (Ministry of Health FTP)
+
+| Module | Description | Granularity | Years |
+|--------|-------------|-------------|-------|
+| **SIM** | Mortality Information System (deaths) | Annual/UF | 1996--2024 |
+| **SINASC** | Live Birth Information System | Annual/UF | 1996--2024 |
+| **SIH** | Hospital Information System (admissions) | Monthly/UF | 2008--2024 |
+| **SIA** | Outpatient Information System (13 file types) | Monthly/type/UF | 2008--2024 |
+
+DATASUS modules download `.dbc` files (compressed DBF) and decompress them internally using vendored C code -- no external dependencies required.
 
 ## Installation
 
@@ -29,112 +40,101 @@ You can install the development version of healthbR from GitHub:
 pak::pak("SidneyBissoli/healthbR")
 ```
 
-## Usage
-
-### Check available years
+## Quick start
 
 ```r
 library(healthbR)
 
-# list available VIGITEL survey years
-vigitel_years()
-#> [1] 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020
-#> [16] 2021 2022 2023
+# see all available data sources
+list_sources()
 ```
 
-### Download and load data
+### DATASUS modules
+
+All DATASUS modules follow a consistent API: `*_years()`, `*_info()`, `*_variables()`, `*_dictionary()`, `*_data()`, `*_cache_status()`, `*_clear_cache()`.
 
 ```r
-# load data for a single year
-df <- vigitel_data(2023)
+# mortality data -- deaths in Acre, 2022
+obitos <- sim_data(year = 2022, uf = "AC")
 
-# load data for multiple years
-df <- vigitel_data(2021:2023)
+# filter by cause of death (CID-10 prefix)
+obitos_cardio <- sim_data(year = 2022, uf = "AC", cause = "I")
+
+# live births in Acre, 2022
+nascimentos <- sinasc_data(year = 2022, uf = "AC")
+
+# hospital admissions in Acre, January 2022
+internacoes <- sih_data(year = 2022, month = 1, uf = "AC")
+
+# filter by diagnosis (CID-10 prefix)
+intern_resp <- sih_data(year = 2022, month = 1, uf = "AC", diagnosis = "J")
+
+# outpatient production in Acre, January 2022
+ambulatorial <- sia_data(year = 2022, month = 1, uf = "AC")
+
+# different file type (e.g., high-cost medications)
+medicamentos <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
 ```
 
-### Explore variables
+### Survey modules
 
 ```r
-# list variables available in a specific year
-vigitel_variables(2023)
+# VIGITEL telephone survey
+vigitel <- vigitel_data(year = 2024)
 
-# get the data dictionary with variable descriptions
-dict <- vigitel_dictionary()
+# PNS national health survey
+pns <- pns_data(year = 2019)
 
-# search for specific variables
-dict |>
-  dplyr::filter(stringr::str_detect(variable_name, "peso"))
+# PNAD Continua
+pnadc <- pnadc_data(year = 2023, quarter = 1)
+
+# POF household budget survey
+pof <- pof_data(year = 2018, register = "morador")
+
+# Census population
+pop <- censo_populacao(year = 2022, territorial_level = "state")
 ```
 
-### Survey analysis with srvyr
+### Explore variables and dictionaries
 
-VIGITEL uses complex survey sampling. Use the `pesorake` weight variable for proper inference:
- 
 ```r
-library(dplyr)
-library(srvyr)
+# list variables for any module
+sim_variables()
+sia_variables(search = "sexo")
 
-# create survey design
-vigitel_svy <- df |>
-  as_survey_design(weights = pesorake)
-
-# calculate weighted prevalence
-vigitel_svy |>
-  group_by(cidade) |>
-  summarize(
-    prevalence = survey_mean(diab == 1, na.rm = TRUE),
-    n = unweighted(n())
-  )
+# data dictionary with category labels
+sim_dictionary("SEXO")
+sia_dictionary("PA_RACACOR")
 ```
 
-## Performance optimization
+## Caching
 
-healthbR offers three strategies for handling large datasets efficiently:
-
-### 1. Parquet conversion (recommended for repeated use)
-
-Convert Excel files to Parquet format for 10-20x faster loading:
+All modules cache downloaded data automatically. Install `arrow` for optimized Parquet caching:
 
 ```r
-# convert downloaded files to parquet (one-time operation
-vigitel_convert_to_parquet(2020:2023)
-
-# subsequent loads are much faster
-df <- vigitel_data(2020:2023)
+install.packages("arrow")
 ```
 
-### 2. Parallel downloads
-
-Download multiple years simultaneously (requires optional packages):
+Each module provides cache management functions:
 
 ```r
-# install optional packages for parallel processing
-install.packages(c("furrr", "future"))
+# check what is cached
+sim_cache_status()
+sih_cache_status()
+sia_cache_status()
 
-# uses furrr for parallel processing (2-4 workers)
-df <- vigitel_data(2015:2023)
-```
-
-### 3. Lazy evaluation with Arrow
-
-For very large datasets, use lazy evaluation to process data without loading everything into memory:
-
-```r
-# returns an Arrow Dataset (not loaded into RAM)
-df_lazy <- vigitel_data(2020:2023, lazy = TRUE)
-
-# filter and select before collecting
-result <- df_lazy |>
-  dplyr::filter(cidade == 1) |>
-  dplyr::select(q6, q8_anos, pesorake, diab, hart) |>
-  dplyr::collect()
+# clear cache for a module
+sim_clear_cache()
 ```
 
 ## Data sources
 
-All data is downloaded from official Brazilian Ministry of Health repositories:
+All data is downloaded from official Brazilian government repositories:
 
-- VIGITEL: https://svs.aids.gov.br/download/Vigitel/
+- **VIGITEL**: <https://svs.aids.gov.br/daent/cgdnt/vigitel/>
+- **PNS / PNAD Continua / POF**: <https://www.ibge.gov.br/>
+- **Censo**: SIDRA API (<https://apisidra.ibge.gov.br/>)
+- **SIM / SINASC / SIH / SIA**: DATASUS FTP (`ftp://ftp.datasus.gov.br/dissemin/publicos/`)
 
 ## Citation
 
@@ -150,8 +150,7 @@ Contributions are welcome! Please open an issue to discuss proposed changes or s
 
 ## Code of Conduct
 
-Please note
- that the healthbR project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+Please note that the healthbR project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
 
 ## License
 

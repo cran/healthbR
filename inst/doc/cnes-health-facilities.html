@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Health Facility Registry with CNES</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Health Facility Registry with CNES</h1>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>The <strong>CNES (Cadastro Nacional de Estabelecimentos de
+Saude)</strong> is Brazil’s national health facility registry,
+maintained by the Ministry of Health through DATASUS. It contains
+monthly snapshots of all registered health establishments,
+professionals, beds, equipment, and more.</p>
+<p>The <code>healthbR</code> package provides access to CNES data from
+the DATASUS FTP:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>File types</td>
+<td>13 (establishments, beds, professionals, etc.)</td>
+</tr>
+<tr class="even">
+<td>Frequency</td>
+<td>Monthly (one file per type/UF/month)</td>
+</tr>
+<tr class="odd">
+<td>Years</td>
+<td>2005–2024 (final + preliminary)</td>
+</tr>
+<tr class="even">
+<td>Coverage</td>
+<td>Per state (27 UFs)</td>
+</tr>
+<tr class="odd">
+<td>Format</td>
+<td>.dbc files, decompressed internally</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="file-types" class="section level2">
+<h2>File types</h2>
+<p>CNES data is organized into 13 file types:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>ST</strong></td>
+<td>Estabelecimentos</td>
+<td>Health facility registry (default)</td>
+</tr>
+<tr class="even">
+<td><strong>LT</strong></td>
+<td>Leitos</td>
+<td>Hospital beds</td>
+</tr>
+<tr class="odd">
+<td><strong>PF</strong></td>
+<td>Profissional</td>
+<td>Health professionals</td>
+</tr>
+<tr class="even">
+<td><strong>DC</strong></td>
+<td>Dados Complementares</td>
+<td>Supplementary facility data</td>
+</tr>
+<tr class="odd">
+<td><strong>EQ</strong></td>
+<td>Equipamentos</td>
+<td>Health equipment</td>
+</tr>
+<tr class="even">
+<td><strong>SR</strong></td>
+<td>Servico Especializado</td>
+<td>Specialized services</td>
+</tr>
+<tr class="odd">
+<td><strong>HB</strong></td>
+<td>Habilitacao</td>
+<td>Facility accreditations</td>
+</tr>
+<tr class="even">
+<td><strong>EP</strong></td>
+<td>Equipes</td>
+<td>Health teams</td>
+</tr>
+<tr class="odd">
+<td><strong>RC</strong></td>
+<td>Regra Contratual</td>
+<td>Contractual rules</td>
+</tr>
+<tr class="even">
+<td><strong>IN</strong></td>
+<td>Incentivos</td>
+<td>Financial incentives</td>
+</tr>
+<tr class="odd">
+<td><strong>EE</strong></td>
+<td>Estab. de Ensino</td>
+<td>Teaching facilities</td>
+</tr>
+<tr class="even">
+<td><strong>EF</strong></td>
+<td>Estab. Filantropico</td>
+<td>Philanthropic facilities</td>
+</tr>
+<tr class="odd">
+<td><strong>GM</strong></td>
+<td>Gestao e Metas</td>
+<td>Management and targets</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="getting-started" class="section level2">
+<h2>Getting started</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(healthbR)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<div id="check-available-years" class="section level3">
+<h3>Check available years</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">cnes_years</span>()</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; [1] 2005 2006 ... 2023</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">cnes_years</span>(<span class="at">status =</span> <span class="st">&quot;all&quot;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; [1] 2005 2006 ... 2023 2024</span></span></code></pre></div>
+</div>
+<div id="module-information" class="section level3">
+<h3>Module information</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">cnes_info</span>()</span></code></pre></div>
+</div>
+</div>
+<div id="downloading-data" class="section level2">
+<h2>Downloading data</h2>
+<div id="basic-download-establishments" class="section level3">
+<h3>Basic download (establishments)</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># all establishments in Acre, January 2023</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>ac_jan <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>ac_jan</span></code></pre></div>
+</div>
+<div id="hospital-beds" class="section level3">
+<h3>Hospital beds</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>leitos <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">type =</span> <span class="st">&quot;LT&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>leitos</span></code></pre></div>
+</div>
+<div id="health-professionals" class="section level3">
+<h3>Health professionals</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>prof <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">type =</span> <span class="st">&quot;PF&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>prof</span></code></pre></div>
+</div>
+</div>
+<div id="month-parameter" class="section level2">
+<h2>Month parameter</h2>
+<p>The <code>month</code> parameter controls which monthly snapshots to
+download:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># single month</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>jan <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># first semester</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>sem1 <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># specific months</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>q1_q3 <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">9</span>), <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co"># all 12 months (default when month = NULL)</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>full_year <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span></code></pre></div>
+<div id="selecting-variables" class="section level3">
+<h3>Selecting variables</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># only key variables (faster)</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">cnes_data</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;CNES&quot;</span>, <span class="st">&quot;CODUFMUN&quot;</span>, <span class="st">&quot;TP_UNID&quot;</span>, <span class="st">&quot;VINC_SUS&quot;</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</div>
+<div id="key-variables-st-type" class="section level2">
+<h2>Key variables (ST type)</h2>
+<table>
+<colgroup>
+<col width="43%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CNES</td>
+<td>Facility CNES code</td>
+</tr>
+<tr class="even">
+<td>CODUFMUN</td>
+<td>Municipality (UF + IBGE 6 digits)</td>
+</tr>
+<tr class="odd">
+<td>TP_UNID</td>
+<td>Facility type (22 categories)</td>
+</tr>
+<tr class="even">
+<td>VINC_SUS</td>
+<td>SUS-linked (0=No, 1=Yes)</td>
+</tr>
+<tr class="odd">
+<td>TP_GESTAO</td>
+<td>Management type (M=Municipal, E=State, D=Dual)</td>
+</tr>
+<tr class="even">
+<td>ESFERA_A</td>
+<td>Administrative sphere (1=Federal, 2=State, 3=Municipal,
+4=Private)</td>
+</tr>
+<tr class="odd">
+<td>TURNO_AT</td>
+<td>Operating hours</td>
+</tr>
+<tr class="even">
+<td>NIV_HIER</td>
+<td>Hierarchy level</td>
+</tr>
+<tr class="odd">
+<td>ATV_AMBUL</td>
+<td>Outpatient care (0/1)</td>
+</tr>
+<tr class="even">
+<td>ATV_HOSP</td>
+<td>Hospital care (0/1)</td>
+</tr>
+<tr class="odd">
+<td>ATV_URG</td>
+<td>Emergency care (0/1)</td>
+</tr>
+<tr class="even">
+<td>COMPETEN</td>
+<td>Reference period (YYYYMM)</td>
+</tr>
+</tbody>
+</table>
+<div id="using-the-dictionary" class="section level3">
+<h3>Using the dictionary</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># all coded variables</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">cnes_dictionary</span>()</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co"># facility types (22 categories)</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="fu">cnes_dictionary</span>(<span class="st">&quot;TP_UNID&quot;</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co"># administrative sphere</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="fu">cnes_dictionary</span>(<span class="st">&quot;ESFERA_A&quot;</span>)</span></code></pre></div>
+</div>
+<div id="joining-dictionary-labels" class="section level3">
+<h3>Joining dictionary labels</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># get facility type labels</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>tp_unid_labels <span class="ot">&lt;-</span> <span class="fu">cnes_dictionary</span>(<span class="st">&quot;TP_UNID&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="fu">select</span>(code, label)</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co"># join to data</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>ac_facilities <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="fu">left_join</span>(tp_unid_labels, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;TP_UNID&quot;</span> <span class="ot">=</span> <span class="st">&quot;code&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">facility_type =</span> label)</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>ac_facilities <span class="sc">|&gt;</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="fu">count</span>(facility_type, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="example-sus-linked-facilities-by-type" class="section level2">
+<h2>Example: SUS-linked facilities by type</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>ac <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>sus_by_type <span class="ot">&lt;-</span> ac <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="fu">filter</span>(VINC_SUS <span class="sc">==</span> <span class="st">&quot;1&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  <span class="fu">count</span>(TP_UNID, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co"># add labels</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>tp_labels <span class="ot">&lt;-</span> <span class="fu">cnes_dictionary</span>(<span class="st">&quot;TP_UNID&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  <span class="fu">select</span>(code, label)</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>sus_by_type <span class="sc">|&gt;</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>  <span class="fu">left_join</span>(tp_labels, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;TP_UNID&quot;</span> <span class="ot">=</span> <span class="st">&quot;code&quot;</span>))</span></code></pre></div>
+</div>
+<div id="example-hospital-beds-per-capita" class="section level2">
+<h2>Example: hospital beds per capita</h2>
+<p>Combine CNES bed data with Census population:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># step 1: count beds by UF (December snapshot)</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>beds <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">12</span>, <span class="at">type =</span> <span class="st">&quot;LT&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="fu">group_by</span>(uf_source) <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">total_beds =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co"># step 2: population from Census 2022</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">censo_populacao</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">territorial_level =</span> <span class="st">&quot;state&quot;</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co"># step 3: calculate beds per 1,000 inhabitants</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co"># beds_rate &lt;- beds |&gt;</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#   left_join(pop, by = ...) |&gt;</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#   mutate(beds_per_1000 = (total_beds / population) * 1000) |&gt;</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#   arrange(desc(beds_per_1000))</span></span></code></pre></div>
+</div>
+<div id="example-tracking-facility-counts-over-time" class="section level2">
+<h2>Example: tracking facility counts over time</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># quarterly snapshots for Sao Paulo</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>sp_quarterly <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="at">year =</span> <span class="dv">2020</span><span class="sc">:</span><span class="dv">2023</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">month =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">9</span>, <span class="dv">12</span>),</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>)</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>facility_trend <span class="ot">&lt;-</span> sp_quarterly <span class="sc">|&gt;</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="fu">group_by</span>(year, month) <span class="sc">|&gt;</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>    <span class="at">total =</span> <span class="fu">n</span>(),</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>    <span class="at">sus_linked =</span> <span class="fu">sum</span>(VINC_SUS <span class="sc">==</span> <span class="st">&quot;1&quot;</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>  <span class="fu">arrange</span>(year, month)</span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>facility_trend</span></code></pre></div>
+</div>
+<div id="download-tips" class="section level2">
+<h2>Download tips</h2>
+<p>CNES data is monthly and per-state, so full downloads can involve
+many files:</p>
+<ul>
+<li><strong>1 UF, 1 month, 1 type</strong> = 1 file</li>
+<li><strong>1 UF, 12 months</strong> = 12 files</li>
+<li><strong>27 UFs, 12 months</strong> = 324 files per type</li>
+</ul>
+<p>Use <code>uf</code> and <code>month</code> to limit downloads. Start
+with a single UF and month to explore the data before scaling up.</p>
+</div>
+<div id="smart-type-parsing" class="section level2">
+<h2>Smart type parsing</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># parsed types (default)</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>ac <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">class</span>(ac<span class="sc">$</span>COMPETEN)  <span class="co"># Date</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co"># raw character columns</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>ac_raw <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">parse =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+</div>
+<div id="cache-management" class="section level2">
+<h2>Cache management</h2>
+<p>Downloaded data is cached locally for faster future access:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># check cache status</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">cnes_cache_status</span>()</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co"># clear cache if needed</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="fu">cnes_clear_cache</span>()</span></code></pre></div>
+<p>If the <code>arrow</code> package is installed, data is cached in
+Parquet format. You can also use lazy evaluation:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># lazy query (requires arrow)</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>cnes_lazy <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">lazy =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>cnes_lazy <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>  <span class="fu">filter</span>(VINC_SUS <span class="sc">==</span> <span class="st">&quot;1&quot;</span>, month <span class="sc">==</span> <span class="dv">1</span><span class="dt">L</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>  <span class="fu">select</span>(CNES, CODUFMUN, TP_UNID) <span class="sc">|&gt;</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div>
+</div>
+<div id="additional-resources" class="section level2">
+<h2>Additional resources</h2>
+<ul>
+<li>CNES official page (<code>cnes.datasus.gov.br</code>)</li>
+<li>CNES open data (<code>dados.gov.br</code>)</li>
+<li><a href="censo-denominadores.html">Census vignette</a> for
+population denominators</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

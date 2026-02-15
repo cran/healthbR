@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Supplementary Health Data with ANS</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Supplementary Health Data with ANS</h1>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>The <strong>ANS (Agencia Nacional de Saude Suplementar)</strong> is
+Brazil’s regulatory agency for private/supplementary health insurance
+(planos de saude). Its open data portal provides data on beneficiaries,
+consumer complaints, and operator financial statements.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Source</td>
+<td>HTTP CSV/ZIP (dadosabertos.ans.gov.br)</td>
+</tr>
+<tr class="even">
+<td>Data types</td>
+<td>3 (beneficiaries, complaints, financial)</td>
+</tr>
+<tr class="odd">
+<td>Beneficiaries</td>
+<td>Monthly, per-UF (Apr 2019–present)</td>
+</tr>
+<tr class="even">
+<td>Complaints</td>
+<td>Annual, national (2011–present)</td>
+</tr>
+<tr class="odd">
+<td>Financial</td>
+<td>Quarterly (2007–present)</td>
+</tr>
+<tr class="even">
+<td>Operators</td>
+<td>Snapshot registry (separate function)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="data-types" class="section level2">
+<h2>Data types</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Name</th>
+<th>Granularity</th>
+<th>Availability</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>beneficiaries</strong></td>
+<td>Beneficiarios</td>
+<td>Monthly, per-UF</td>
+<td>Apr 2019–2025</td>
+</tr>
+<tr class="even">
+<td><strong>complaints</strong></td>
+<td>Demandas NIP</td>
+<td>Annual, national</td>
+<td>2011–2026</td>
+</tr>
+<tr class="odd">
+<td><strong>financial</strong></td>
+<td>Demonstracoes contabeis</td>
+<td>Quarterly</td>
+<td>2007–2025</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="getting-started" class="section level2">
+<h2>Getting started</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(healthbR)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<div id="check-available-years" class="section level3">
+<h3>Check available years</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># beneficiaries (default)</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">ans_years</span>()</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co"># complaints</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">ans_years</span>(<span class="at">type =</span> <span class="st">&quot;complaints&quot;</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># financial statements</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">ans_years</span>(<span class="at">type =</span> <span class="st">&quot;financial&quot;</span>)</span></code></pre></div>
+</div>
+<div id="module-information" class="section level3">
+<h3>Module information</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">ans_info</span>()</span></code></pre></div>
+</div>
+</div>
+<div id="beneficiaries" class="section level2">
+<h2>Beneficiaries</h2>
+<p>Beneficiary data provides consolidated counts of health plan
+enrollees broken down by operator, municipality, sex, age group, plan
+type, and more. Each file covers one state (UF) and one month.</p>
+<div id="basic-download" class="section level3">
+<h3>Basic download</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Acre, December 2023</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>ac <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">12</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>ac</span></code></pre></div>
+</div>
+<div id="multiple-months-and-states" class="section level3">
+<h3>Multiple months and states</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># first quarter 2024, two states</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>ne <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">month =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">uf =</span> <span class="fu">c</span>(<span class="st">&quot;CE&quot;</span>, <span class="st">&quot;PE&quot;</span>))</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># full year (month = NULL downloads all 12 months)</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>ac_2023 <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span></code></pre></div>
+</div>
+<div id="selecting-variables" class="section level3">
+<h3>Selecting variables</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">ans_data</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">12</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;CD_OPERADORA&quot;</span>, <span class="st">&quot;SG_UF&quot;</span>, <span class="st">&quot;TP_SEXO&quot;</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>           <span class="st">&quot;DE_FAIXA_ETARIA&quot;</span>, <span class="st">&quot;QT_BENEFICIARIO_ATIVO&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="key-variables" class="section level3">
+<h3>Key variables</h3>
+<table>
+<colgroup>
+<col width="43%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ID_CMPT_MOVEL</td>
+<td>Reference period (YYYY-MM)</td>
+</tr>
+<tr class="even">
+<td>CD_OPERADORA</td>
+<td>Operator code at ANS</td>
+</tr>
+<tr class="odd">
+<td>NM_RAZAO_SOCIAL</td>
+<td>Operator name</td>
+</tr>
+<tr class="even">
+<td>SG_UF</td>
+<td>State abbreviation</td>
+</tr>
+<tr class="odd">
+<td>CD_MUNICIPIO</td>
+<td>Municipality (IBGE code)</td>
+</tr>
+<tr class="even">
+<td>TP_SEXO</td>
+<td>Sex (M/F)</td>
+</tr>
+<tr class="odd">
+<td>DE_FAIXA_ETARIA</td>
+<td>Age group</td>
+</tr>
+<tr class="even">
+<td>DE_CONTRATACAO_PLANO</td>
+<td>Contract type (Individual, Coletivo Empresarial, etc.)</td>
+</tr>
+<tr class="odd">
+<td>DE_SEGMENTACAO_PLANO</td>
+<td>Plan segment (Ambulatorial, Hospitalar, etc.)</td>
+</tr>
+<tr class="even">
+<td>COBERTURA_ASSIST_PLAN</td>
+<td>Coverage type (Medico-hospitalar, Odontologica)</td>
+</tr>
+<tr class="odd">
+<td>TIPO_VINCULO</td>
+<td>Beneficiary link (Titular, Dependente)</td>
+</tr>
+<tr class="even">
+<td>QT_BENEFICIARIO_ATIVO</td>
+<td>Active beneficiary count</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="consumer-complaints-nip" class="section level2">
+<h2>Consumer complaints (NIP)</h2>
+<p>Consumer complaints data covers demands filed through ANS’s NIP
+(Notificacao de Intermediacao Preliminar) system. Files are national
+(not per-UF) and annual.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># complaints filed in 2022</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>nip <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">type =</span> <span class="st">&quot;complaints&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>nip</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># multiple years</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>nip_multi <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2020</span><span class="sc">:</span><span class="dv">2023</span>, <span class="at">type =</span> <span class="st">&quot;complaints&quot;</span>)</span></code></pre></div>
+<div id="key-variables-1" class="section level3">
+<h3>Key variables</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NUMERO_DA_DEMANDA</td>
+<td>Complaint number</td>
+</tr>
+<tr class="even">
+<td>ABERTURA_DA_DEMANDA</td>
+<td>Filing date</td>
+</tr>
+<tr class="odd">
+<td>ASSUNTO</td>
+<td>Subject</td>
+</tr>
+<tr class="even">
+<td>REGISTRO_OPERADORA</td>
+<td>Operator registration</td>
+</tr>
+<tr class="odd">
+<td>NOME_OPERADORA</td>
+<td>Operator name</td>
+</tr>
+<tr class="even">
+<td>TIPO_DE_PLANO_CONTRATADO</td>
+<td>Contract type</td>
+</tr>
+<tr class="odd">
+<td>SEXO</td>
+<td>Sex (M/F)</td>
+</tr>
+<tr class="even">
+<td>ESTADO_DO_BENEFICIARIO</td>
+<td>Beneficiary state</td>
+</tr>
+<tr class="odd">
+<td>CLASSIFICACAO_DA_NIP</td>
+<td>NIP classification</td>
+</tr>
+<tr class="even">
+<td>NATUREZA_DA_NIP</td>
+<td>NIP nature</td>
+</tr>
+<tr class="odd">
+<td>SITUACAO_DA_NIP</td>
+<td>NIP status</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="financial-statements" class="section level2">
+<h2>Financial statements</h2>
+<p>Quarterly financial statements (demonstracoes contabeis) for all
+health plan operators.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Q1 2023</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>fin_q1 <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">type =</span> <span class="st">&quot;financial&quot;</span>, <span class="at">quarter =</span> <span class="dv">1</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co"># all 4 quarters of 2023</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>fin_2023 <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">type =</span> <span class="st">&quot;financial&quot;</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co"># specific quarters</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>fin_q12 <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">type =</span> <span class="st">&quot;financial&quot;</span>, <span class="at">quarter =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span></code></pre></div>
+<div id="key-variables-2" class="section level3">
+<h3>Key variables</h3>
+<table>
+<colgroup>
+<col width="43%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DATA</td>
+<td>Reference date</td>
+</tr>
+<tr class="even">
+<td>REG_ANS</td>
+<td>Operator registration</td>
+</tr>
+<tr class="odd">
+<td>CD_CONTA_CONTABIL</td>
+<td>Accounting code</td>
+</tr>
+<tr class="even">
+<td>DESCRICAO</td>
+<td>Account description</td>
+</tr>
+<tr class="odd">
+<td>VL_SALDO_INICIAL</td>
+<td>Opening balance (R<span class="math inline">\() |
+| VL_SALDO_FINAL | Closing balance (R\)</span>)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="operator-registry" class="section level2">
+<h2>Operator registry</h2>
+<p>The operator registry is a separate snapshot (not time-series), so it
+uses its own function:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># active operators</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>active <span class="ot">&lt;-</span> <span class="fu">ans_operators</span>()</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co"># cancelled operators</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>cancelled <span class="ot">&lt;-</span> <span class="fu">ans_operators</span>(<span class="at">status =</span> <span class="st">&quot;cancelled&quot;</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co"># both combined</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>all_ops <span class="ot">&lt;-</span> <span class="fu">ans_operators</span>(<span class="at">status =</span> <span class="st">&quot;all&quot;</span>)</span></code></pre></div>
+<div id="key-variables-3" class="section level3">
+<h3>Key variables</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>REGISTRO_OPERADORA</td>
+<td>ANS registration number</td>
+</tr>
+<tr class="even">
+<td>CNPJ</td>
+<td>Tax ID</td>
+</tr>
+<tr class="odd">
+<td>Razao_Social</td>
+<td>Legal name</td>
+</tr>
+<tr class="even">
+<td>Nome_Fantasia</td>
+<td>Trade name</td>
+</tr>
+<tr class="odd">
+<td>Modalidade</td>
+<td>Modality (Medicina de Grupo, Cooperativa, etc.)</td>
+</tr>
+<tr class="even">
+<td>UF</td>
+<td>State</td>
+</tr>
+<tr class="odd">
+<td>Data_Registro_ANS</td>
+<td>ANS registration date</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="exploring-variables" class="section level2">
+<h2>Exploring variables</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># beneficiaries variables (default)</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">ans_variables</span>()</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co"># complaints variables</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="fu">ans_variables</span>(<span class="at">type =</span> <span class="st">&quot;complaints&quot;</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co"># financial variables</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="fu">ans_variables</span>(<span class="at">type =</span> <span class="st">&quot;financial&quot;</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co"># search across variables</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="fu">ans_variables</span>(<span class="at">search =</span> <span class="st">&quot;operadora&quot;</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="fu">ans_variables</span>(<span class="at">search =</span> <span class="st">&quot;beneficiario&quot;</span>)</span></code></pre></div>
+</div>
+<div id="example-beneficiaries-by-state-and-plan-type" class="section level2">
+<h2>Example: beneficiaries by state and plan type</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># December 2023, all states</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>ben <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">12</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># active beneficiaries by state and coverage type</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>ben <span class="sc">|&gt;</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="fu">group_by</span>(SG_UF, COBERTURA_ASSIST_PLAN) <span class="sc">|&gt;</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>    <span class="at">total =</span> <span class="fu">sum</span>(<span class="fu">as.integer</span>(QT_BENEFICIARIO_ATIVO), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total))</span></code></pre></div>
+</div>
+<div id="example-complaints-by-subject-and-operator" class="section level2">
+<h2>Example: complaints by subject and operator</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>nip <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">type =</span> <span class="st">&quot;complaints&quot;</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co"># top complaint subjects</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>nip <span class="sc">|&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="fu">count</span>(ASSUNTO, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co"># operators with most complaints</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>nip <span class="sc">|&gt;</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>  <span class="fu">count</span>(NOME_OPERADORA, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>)</span></code></pre></div>
+</div>
+<div id="example-operator-financial-health" class="section level2">
+<h2>Example: operator financial health</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Q4 2023 financial data</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>fin <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">type =</span> <span class="st">&quot;financial&quot;</span>, <span class="at">quarter =</span> <span class="dv">4</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co"># join with operator registry for names</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>ops <span class="ot">&lt;-</span> <span class="fu">ans_operators</span>()</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>fin <span class="sc">|&gt;</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">&quot;^41&quot;</span>, CD_CONTA_CONTABIL)) <span class="sc">|&gt;</span>  <span class="co"># revenue accounts</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="fu">group_by</span>(REG_ANS) <span class="sc">|&gt;</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>    <span class="at">revenue =</span> <span class="fu">sum</span>(<span class="fu">as.numeric</span>(VL_SALDO_FINAL), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>    ops <span class="sc">|&gt;</span> <span class="fu">select</span>(REGISTRO_OPERADORA, Razao_Social),</span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;REG_ANS&quot;</span> <span class="ot">=</span> <span class="st">&quot;REGISTRO_OPERADORA&quot;</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(revenue)) <span class="sc">|&gt;</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>)</span></code></pre></div>
+</div>
+<div id="example-combining-ans-with-sus-data" class="section level2">
+<h2>Example: combining ANS with SUS data</h2>
+<p>ANS beneficiary counts complement SUS data by showing private
+coverage:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># private coverage (ANS)</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>ben <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">12</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>                <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;SG_UF&quot;</span>, <span class="st">&quot;QT_BENEFICIARIO_ATIVO&quot;</span>))</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>private_by_uf <span class="ot">&lt;-</span> ben <span class="sc">|&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  <span class="fu">group_by</span>(SG_UF) <span class="sc">|&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>    <span class="at">private_beneficiaries =</span> <span class="fu">sum</span>(<span class="fu">as.integer</span>(QT_BENEFICIARIO_ATIVO), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>  )</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co"># total population (Census 2022)</span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">censo_populacao</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">territorial_level =</span> <span class="st">&quot;state&quot;</span>)</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="co"># private coverage rate</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="co"># private_by_uf |&gt;</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="co">#   left_join(pop, by = ...) |&gt;</span></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="co">#   mutate(coverage_pct = (private_beneficiaries / population) * 100) |&gt;</span></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co">#   arrange(desc(coverage_pct))</span></span></code></pre></div>
+</div>
+<div id="parameter-routing" class="section level2">
+<h2>Parameter routing</h2>
+<p><code>ans_data()</code> routes parameters based on the
+<code>type</code>:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th align="center">beneficiaries</th>
+<th align="center">complaints</th>
+<th align="center">financial</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>year</code></td>
+<td align="center">required</td>
+<td align="center">required</td>
+<td align="center">required</td>
+</tr>
+<tr class="even">
+<td><code>month</code></td>
+<td align="center">optional (1–12)</td>
+<td align="center">ignored</td>
+<td align="center">ignored</td>
+</tr>
+<tr class="odd">
+<td><code>uf</code></td>
+<td align="center">optional (27 UFs + XX)</td>
+<td align="center">ignored</td>
+<td align="center">ignored</td>
+</tr>
+<tr class="even">
+<td><code>quarter</code></td>
+<td align="center">ignored</td>
+<td align="center">ignored</td>
+<td align="center">optional (1–4)</td>
+</tr>
+<tr class="odd">
+<td><code>vars</code></td>
+<td align="center">optional</td>
+<td align="center">optional</td>
+<td align="center">optional</td>
+</tr>
+</tbody>
+</table>
+<p>Unused parameters emit a warning but do not cause errors.</p>
+</div>
+<div id="lazy-evaluation" class="section level2">
+<h2>Lazy evaluation</h2>
+<p>With the <code>arrow</code> package installed, data is cached in
+Parquet format and can be queried lazily:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># lazy query (requires arrow)</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>lazy_ben <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">lazy =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>lazy_ben <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>  <span class="fu">filter</span>(month <span class="sc">==</span> <span class="dv">12</span><span class="dt">L</span>, TP_SEXO <span class="sc">==</span> <span class="st">&quot;F&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  <span class="fu">select</span>(CD_OPERADORA, DE_FAIXA_ETARIA, QT_BENEFICIARIO_ATIVO) <span class="sc">|&gt;</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div>
+</div>
+<div id="cache-management" class="section level2">
+<h2>Cache management</h2>
+<p>Downloaded data is cached locally for faster future access:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># check cache status</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">ans_cache_status</span>()</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co"># clear cache if needed</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="fu">ans_clear_cache</span>()</span></code></pre></div>
+</div>
+<div id="differences-from-datasus-modules" class="section level2">
+<h2>Differences from DATASUS modules</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>ANS</th>
+<th>DATASUS modules</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Data source</td>
+<td>HTTP CSV/ZIP</td>
+<td>FTP .dbc/.DBF files</td>
+</tr>
+<tr class="even">
+<td>Column names</td>
+<td>MixedCase (from CSV)</td>
+<td>UPPERCASE</td>
+</tr>
+<tr class="odd">
+<td><code>parse</code> parameter</td>
+<td>Not available</td>
+<td>Available</td>
+</tr>
+<tr class="even">
+<td><code>dictionary()</code></td>
+<td>Not available</td>
+<td>Available</td>
+</tr>
+<tr class="odd">
+<td><code>quarter</code> parameter</td>
+<td>Financial data</td>
+<td>Not used</td>
+</tr>
+<tr class="even">
+<td>Operator registry</td>
+<td><code>ans_operators()</code></td>
+<td>Not applicable</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="additional-resources" class="section level2">
+<h2>Additional resources</h2>
+<ul>
+<li>ANS open data portal (<code>dadosabertos.ans.gov.br</code>)</li>
+<li>ANS official website (<code>www.gov.br/ans/pt-br</code>)</li>
+<li>ANS Tabnet (<code>www.ans.gov.br/anstabnet</code>)</li>
+<li><a href="censo-denominadores.html">Census vignette</a> for
+population denominators</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

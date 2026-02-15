@@ -1,3 +1,90 @@
+# healthbR 0.2.0
+
+## New modules
+
+* **CNES (National Health Facility Registry)**: Health facility data from
+  DATASUS FTP as .dbc files (2005-2024). 13 file types (ST, LT, PF, DC, EQ,
+  SR, HB, EP, RC, IN, EE, EF, GM), monthly data per UF.
+
+* **SINAN (Notifiable Diseases Surveillance)**: Disease notification microdata
+  from DATASUS FTP as .dbc files (2007-2024). 31 diseases including DENG, CHIK,
+  ZIKA, TUBE, HANS, HEPA, MALA, and more.
+
+* **SI-PNI (National Immunization Program)**: Aggregated vaccination data from
+  DATASUS FTP as .DBF files (1994-2019), plus individual-level microdata from
+  OpenDataSUS CSV (2020-2025). Transparent year-based routing between sources.
+
+* **SISAB (Primary Care Health Information)**: Coverage indicators from the
+  relatorioaps REST API. 4 report types (aps, sb, acs, pns) at 4 geographic
+  levels (brazil, region, uf, municipality).
+
+* **ANS (Supplementary Health)**: Beneficiary, complaint, and financial data
+  from the ANS open data portal. Plus `ans_operators()` for operator registry.
+
+* **ANVISA (Health Surveillance)**: Product registrations, pharmacovigilance,
+  hemovigilance, technovigilance, and controlled substance sales (SNGPC)
+  from the ANVISA open data portal. 14 data types total.
+
+* **POF (Household Budget Survey)**: Food security, consumption, and health
+  expenditure microdata from IBGE FTP (2002-2003, 2008-2009, 2017-2018).
+
+* **PNADC (PNAD Continua)**: Health-related supplementary modules from PNAD
+  Continua (deficiencia, habitacao, moradores, APS).
+
+* **PNS (National Health Survey)**: Microdata and SIDRA tabulated data
+  (2013, 2019).
+
+* **Censo Demografico**: Population denominators from the IBGE SIDRA API,
+  covering Census years 1970-2022 and intercensitary estimates 2001-2021.
+
+## Performance improvements
+
+* Hive-style partitioned parquet caching for all DATASUS modules.
+
+* Lazy evaluation with `lazy = TRUE` and `backend = "arrow"` or `"duckdb"`
+  for out-of-memory queries.
+
+* Parallel downloads via `.map_parallel()` (furrr when configured, purrr
+  fallback).
+
+* Concurrent HTTP downloads for SI-PNI multi-month CSV requests via
+  `curl::multi_download()`.
+
+* Resumable HTTP downloads via Range headers for large files.
+
+* Smart type parsing (`parse = TRUE`) for all 7 DATASUS modules, with
+  automatic numeric and date column conversion. Use `col_types` for
+  fine-grained control or `parse = FALSE` for all-character.
+
+## Refactoring
+
+* Extracted shared helpers for validation, search, cache management, and
+  return logic, eliminating ~1100 lines of duplication across modules.
+
+* Removed deprecated flat cache migration infrastructure.
+
+* Moved `readxl` and `haven` from Imports to Suggests.
+
+* Removed unused `vroom` from Suggests.
+
+## Breaking changes
+
+* Complete refactoring of VIGITEL functions due to Ministry of Health website
+  restructuring. Data is now distributed as a single consolidated file
+  containing all years (2006-2024) instead of separate files per year.
+
+* `vigitel_data()` API changed: new `format` parameter, `year` defaults to
+
+  NULL (all years), removed `lazy`/`parallel`/`force_download` parameters.
+
+* Removed `vigitel_download()` and `vigitel_convert_to_parquet()` functions.
+
+## Bug fixes
+
+* Fixed PNS Arrow expression error with partition filtering.
+* Fixed `pns_sidra_data()` unknown table warning.
+* Fixed POF dictionary parsing failure on Linux/Ubuntu.
+
 # healthbR 0.1.1
 
 ## Changes
@@ -7,7 +94,6 @@
   informative error messages with installation instructions when needed.
 
 * Added `cache_dir` parameter to all data fetching functions (`vigitel_data()`,
-
   `vigitel_download()`, `vigitel_variables()`, `vigitel_dictionary()`,
   `vigitel_cache_status()`, `vigitel_clear_cache()`). This allows using
   `tempdir()` for temporary storage that doesn't persist after the R session.

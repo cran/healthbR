@@ -1,6 +1,7 @@
 #' Utility Functions for healthbR
 #'
 #' @name utils
+#' @keywords internal
 NULL
 
 #' List Available Data Sources
@@ -34,7 +35,11 @@ list_sources <- function() {
       "sih",
       "sia",
       "sinan",
-      "cnes"
+      "cnes",
+      "sipni",
+      "sisab",
+      "ans",
+      "anvisa"
     ),
     name = c(
       "VIGITEL",
@@ -47,7 +52,11 @@ list_sources <- function() {
       "SIH - Sistema de Informacoes Hospitalares",
       "SIA - Sistema de Informacoes Ambulatoriais",
       "SINAN - Sistema de Informacao de Agravos de Notificacao",
-      "CNES - Cadastro Nacional de Estabelecimentos de Saude"
+      "CNES - Cadastro Nacional de Estabelecimentos de Saude",
+      "SI-PNI - Sistema de Informacao do Programa Nacional de Imunizacoes",
+      "SISAB - Sistema de Informacao em Saude para a Atencao Basica",
+      "ANS - Agencia Nacional de Saude Suplementar",
+      "ANVISA - Agencia Nacional de Vigilancia Sanitaria"
     ),
     description = c(
       "Telephone survey on chronic disease risk factors",
@@ -60,33 +69,45 @@ list_sources <- function() {
       "Hospital admissions (AIH)",
       "Outpatient procedures",
       "Notifiable diseases surveillance",
-      "Health facilities registry"
+      "Health facilities registry",
+      "Vaccination doses/coverage (aggregated 1994-2019, microdata 2020+)",
+      "Primary care coverage indicators (REST API)",
+      "Supplementary health: beneficiaries, complaints, financial statements",
+      "Health surveillance: product registrations, pharmacovigilance, SNGPC"
     ),
     years = c(
-      "2006-2023",
+      "2006-2024",
       "2013, 2019",
-      "2012-2023",
-      "2008-2009, 2017-2018",
+      "2012-2024",
+      "2002-2003, 2008-2009, 2017-2018",
       "1991, 2000, 2010, 2022",
-      "1979-2023",
+      "1996-2024",
+      "1996-2024",
+      "2008-2024",
       "1994-2023",
-      "1992-2023",
-      "1994-2023",
-      "2001-2023",
-      "2005-2023"
+      "2007-2024",
+      "2005-2023",
+      "1994-2025",
+      "2007-2025",
+      "2007-2026",
+      "2014-2026 (SNGPC)"
     ),
     status = c(
       "available",
-      "planned",
-      "planned",
-      "planned",
-      "planned",
-      "planned",
-      "planned",
-      "planned",
-      "planned",
-      "planned",
-      "planned"
+      "available",
+      "available",
+      "available",
+      "available",
+      "available",
+      "available",
+      "available",
+      "available",
+      "available",
+      "available",
+      "available",
+      "available",
+      "available",
+      "available"
     )
   )
 }

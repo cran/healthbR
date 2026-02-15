@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>DATASUS Modules: SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, and SISAB</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">DATASUS Modules: SIM, SINASC, SIH, SIA,
+SINAN, CNES, SI-PNI, and SISAB</h1>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>The <code>healthbR</code> package provides access to eight DATASUS
+information systems, covering mortality, live births, hospital
+admissions, outpatient production, notifiable diseases, the health
+facility registry, vaccination data, and primary care coverage:</p>
+<table>
+<colgroup>
+<col width="14%" />
+<col width="18%" />
+<col width="30%" />
+<col width="23%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Function</th>
+<th>Source document</th>
+<th>Granularity</th>
+<th>Years</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>SIM</td>
+<td><code>sim_data()</code></td>
+<td>Declaracao de Obito (DO)</td>
+<td>Annual/UF</td>
+<td>1996–2024</td>
+</tr>
+<tr class="even">
+<td>SINASC</td>
+<td><code>sinasc_data()</code></td>
+<td>Declaracao de Nascido Vivo (DN)</td>
+<td>Annual/UF</td>
+<td>1996–2024</td>
+</tr>
+<tr class="odd">
+<td>SIH</td>
+<td><code>sih_data()</code></td>
+<td>AIH (Autorizacao de Internacao Hospitalar)</td>
+<td>Monthly/UF</td>
+<td>2008–2024</td>
+</tr>
+<tr class="even">
+<td>SIA</td>
+<td><code>sia_data()</code></td>
+<td>BPA / APAC</td>
+<td>Monthly/type/UF</td>
+<td>2008–2024</td>
+</tr>
+<tr class="odd">
+<td>SINAN</td>
+<td><code>sinan_data()</code></td>
+<td>Ficha de Notificacao</td>
+<td>Annual/National</td>
+<td>2007–2024</td>
+</tr>
+<tr class="even">
+<td>CNES</td>
+<td><code>cnes_data()</code></td>
+<td>Cadastro de Estabelecimentos</td>
+<td>Monthly/type/UF</td>
+<td>2005–2024</td>
+</tr>
+<tr class="odd">
+<td>SI-PNI</td>
+<td><code>sipni_data()</code></td>
+<td>PNI (doses, cobertura, microdados)</td>
+<td>Annual/UF</td>
+<td>1994–2025</td>
+</tr>
+<tr class="even">
+<td>SISAB</td>
+<td><code>sisab_data()</code></td>
+<td>Cobertura da Atencao Primaria</td>
+<td>Monthly</td>
+<td>2007–present</td>
+</tr>
+</tbody>
+</table>
+<p>All seven modules share the same infrastructure:</p>
+<ul>
+<li><strong>DBC decompression</strong>: .dbc files (compressed DBF) are
+decompressed internally using vendored C code – no external dependencies
+required.</li>
+<li><strong>FTP download</strong>: files are fetched from
+<code>ftp.datasus.gov.br</code> with automatic retry and exponential
+backoff.</li>
+<li><strong>Cache</strong>: downloaded data is cached locally in Parquet
+(if <code>arrow</code> is installed) or .rds format.</li>
+<li><strong>Consistent API</strong>: every module exposes
+<code>*_years()</code>, <code>*_info()</code>,
+<code>*_variables()</code>, <code>*_dictionary()</code>,
+<code>*_data()</code>, <code>*_cache_status()</code>, and
+<code>*_clear_cache()</code>.</li>
+</ul>
+</div>
+<div id="getting-started" class="section level2">
+<h2>Getting started</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(healthbR)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<div id="common-helper-functions" class="section level3">
+<h3>Common helper functions</h3>
+<p>Each module provides the same set of helper functions. Here is a
+quick tour using SIM as an example:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># available years</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">sim_years</span>()</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; [1] 1996 1997 1998 ... 2023</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co"># module information (data source, key variables, usage tips)</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">sim_info</span>()</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co"># list all variables with descriptions</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">sim_variables</span>()</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co"># search for a specific variable</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="fu">sim_variables</span>(<span class="at">search =</span> <span class="st">&quot;causa&quot;</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co"># data dictionary with category labels</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="fu">sim_dictionary</span>(<span class="st">&quot;SEXO&quot;</span>)</span></code></pre></div>
+<p>The same pattern works for <code>sinasc_*()</code>,
+<code>sih_*()</code>, <code>sia_*()</code>, <code>sinan_*()</code>,
+<code>cnes_*()</code>, and <code>sipni_*()</code>.</p>
+</div>
+</div>
+<div id="sim-mortality" class="section level2">
+<h2>SIM – Mortality</h2>
+<p>The SIM (Sistema de Informacoes sobre Mortalidade) contains
+individual death records based on the Declaracao de Obito (DO).</p>
+<div id="basic-download" class="section level3">
+<h3>Basic download</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># all deaths in Acre, 2022</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>obitos_ac <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>obitos_ac</span></code></pre></div>
+</div>
+<div id="filter-by-cause-of-death" class="section level3">
+<h3>Filter by cause of death</h3>
+<p>The <code>cause</code> parameter filters by underlying cause of death
+(CAUSABAS) using CID-10 prefix matching:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># deaths from acute myocardial infarction (I21)</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>obitos_iam <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">cause =</span> <span class="st">&quot;I21&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># all cardiovascular deaths (chapter I)</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>obitos_cardio <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">cause =</span> <span class="st">&quot;I&quot;</span>)</span></code></pre></div>
+</div>
+<div id="key-variables" class="section level3">
+<h3>Key variables</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>CAUSABAS</code></td>
+<td>Underlying cause of death (CID-10)</td>
+</tr>
+<tr class="even">
+<td><code>DTOBITO</code></td>
+<td>Date of death</td>
+</tr>
+<tr class="odd">
+<td><code>SEXO</code></td>
+<td>Sex (M = Male, F = Female, I = Unknown)</td>
+</tr>
+<tr class="even">
+<td><code>IDADE</code></td>
+<td>Age (encoded: 1st digit = unit, digits 2-3 = value)</td>
+</tr>
+<tr class="odd">
+<td><code>CODMUNRES</code></td>
+<td>Municipality of residence (IBGE code)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="example-deaths-by-cause-chapter" class="section level3">
+<h3>Example: deaths by cause chapter</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>obitos_ac <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>obitos_ac <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">chapter =</span> <span class="fu">substr</span>(CAUSABAS, <span class="dv">1</span>, <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="fu">count</span>(chapter, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="sinasc-live-births" class="section level2">
+<h2>SINASC – Live births</h2>
+<p>The SINASC (Sistema de Informacoes sobre Nascidos Vivos) contains
+individual live birth records from the Declaracao de Nascido Vivo
+(DN).</p>
+<div id="basic-download-1" class="section level3">
+<h3>Basic download</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>nasc_ac <span class="ot">&lt;-</span> <span class="fu">sinasc_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>nasc_ac</span></code></pre></div>
+</div>
+<div id="filter-by-congenital-anomaly" class="section level3">
+<h3>Filter by congenital anomaly</h3>
+<p>The <code>anomaly</code> parameter filters by the CODANOMAL variable
+using CID-10 prefix matching:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># births with any congenital anomaly (chapter Q)</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>anomalias <span class="ot">&lt;-</span> <span class="fu">sinasc_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">anomaly =</span> <span class="st">&quot;Q&quot;</span>)</span></code></pre></div>
+</div>
+<div id="key-variables-1" class="section level3">
+<h3>Key variables</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>DTNASC</code></td>
+<td>Date of birth</td>
+</tr>
+<tr class="even">
+<td><code>SEXO</code></td>
+<td>Sex (1 = Male, 2 = Female, 0 = Unknown)</td>
+</tr>
+<tr class="odd">
+<td><code>PESO</code></td>
+<td>Birth weight (grams)</td>
+</tr>
+<tr class="even">
+<td><code>IDADEMAE</code></td>
+<td>Mother’s age</td>
+</tr>
+<tr class="odd">
+<td><code>CODMUNRES</code></td>
+<td>Municipality of residence (IBGE code)</td>
+</tr>
+<tr class="even">
+<td><code>CODANOMAL</code></td>
+<td>Congenital anomaly code (CID-10)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="example-birth-weight-distribution" class="section level3">
+<h3>Example: birth weight distribution</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>nasc_ac <span class="ot">&lt;-</span> <span class="fu">sinasc_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>nasc_ac <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">peso_num =</span> <span class="fu">as.numeric</span>(PESO)) <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(peso_num), peso_num <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">weight_group =</span> <span class="fu">case_when</span>(</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    peso_num <span class="sc">&lt;</span> <span class="dv">1500</span> <span class="sc">~</span> <span class="st">&quot;Very low (&lt;1500g)&quot;</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>    peso_num <span class="sc">&lt;</span> <span class="dv">2500</span> <span class="sc">~</span> <span class="st">&quot;Low (1500-2499g)&quot;</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>    peso_num <span class="sc">&lt;</span> <span class="dv">4000</span> <span class="sc">~</span> <span class="st">&quot;Normal (2500-3999g)&quot;</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>    <span class="cn">TRUE</span>            <span class="sc">~</span> <span class="st">&quot;High (&gt;=4000g)&quot;</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  )) <span class="sc">|&gt;</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  <span class="fu">count</span>(weight_group)</span></code></pre></div>
+</div>
+</div>
+<div id="sih-hospital-admissions" class="section level2">
+<h2>SIH – Hospital admissions</h2>
+<p>The SIH (Sistema de Informacoes Hospitalares) contains individual
+hospital admission records from the AIH (Autorizacao de Internacao
+Hospitalar). Unlike SIM and SINASC, data is organized
+<strong>monthly</strong>.</p>
+<div id="basic-download-2" class="section level3">
+<h3>Basic download</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># admissions in Acre, January 2022</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>intern_jan <span class="ot">&lt;-</span> <span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>intern_jan</span></code></pre></div>
+</div>
+<div id="the-month-parameter" class="section level3">
+<h3>The <code>month</code> parameter</h3>
+<p>SIH data is monthly – one file per UF per month. Use
+<code>month</code> to control which months to download:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># single month</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">6</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co"># first semester</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co"># all 12 months (default when month = NULL -- downloads 12 files per UF)</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span></code></pre></div>
+</div>
+<div id="filter-by-diagnosis" class="section level3">
+<h3>Filter by diagnosis</h3>
+<p>The <code>diagnosis</code> parameter filters by the principal
+diagnosis (DIAG_PRINC) using CID-10 prefix matching:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># respiratory admissions (chapter J)</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">diagnosis =</span> <span class="st">&quot;J&quot;</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># pneumonia specifically (J12-J18)</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>pneum <span class="ot">&lt;-</span> <span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>                  <span class="at">diagnosis =</span> <span class="fu">c</span>(<span class="st">&quot;J12&quot;</span>, <span class="st">&quot;J13&quot;</span>, <span class="st">&quot;J14&quot;</span>, <span class="st">&quot;J15&quot;</span>, <span class="st">&quot;J16&quot;</span>, <span class="st">&quot;J17&quot;</span>, <span class="st">&quot;J18&quot;</span>))</span></code></pre></div>
+</div>
+<div id="key-variables-2" class="section level3">
+<h3>Key variables</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>DIAG_PRINC</code></td>
+<td>Principal diagnosis (CID-10)</td>
+</tr>
+<tr class="even">
+<td><code>DT_INTER</code></td>
+<td>Admission date</td>
+</tr>
+<tr class="odd">
+<td><code>SEXO</code></td>
+<td>Sex (1 = Male, 3 = Female, 0 = Unknown)</td>
+</tr>
+<tr class="even">
+<td><code>MORTE</code></td>
+<td>In-hospital death (1 = Yes, 0 = No)</td>
+</tr>
+<tr class="odd">
+<td><code>VAL_TOT</code></td>
+<td>Total value (R$)</td>
+</tr>
+<tr class="even">
+<td><code>DIAS_PERM</code></td>
+<td>Length of stay (days)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="example-admissions-by-diagnosis-chapter" class="section level3">
+<h3>Example: admissions by diagnosis chapter</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>intern <span class="ot">&lt;-</span> <span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>intern <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">chapter =</span> <span class="fu">substr</span>(DIAG_PRINC, <span class="dv">1</span>, <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="fu">count</span>(chapter, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="sia-outpatient-production" class="section level2">
+<h2>SIA – Outpatient production</h2>
+<p>The SIA (Sistema de Informacoes Ambulatoriais) contains outpatient
+production records. Like SIH, data is monthly, but SIA also has
+<strong>13 file types</strong> covering different categories of
+outpatient care.</p>
+<div id="file-types" class="section level3">
+<h3>File types</h3>
+<table>
+<colgroup>
+<col width="24%" />
+<col width="24%" />
+<col width="52%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PA</td>
+<td>Producao Ambulatorial</td>
+<td>BPA consolidated (default)</td>
+</tr>
+<tr class="even">
+<td>BI</td>
+<td>Boletim Individualizado</td>
+<td>BPA individualized</td>
+</tr>
+<tr class="odd">
+<td>AD</td>
+<td>APAC Laudos Diversos</td>
+<td>High-complexity authorizations</td>
+</tr>
+<tr class="even">
+<td>AM</td>
+<td>APAC Medicamentos</td>
+<td>High-cost medications</td>
+</tr>
+<tr class="odd">
+<td>AN</td>
+<td>APAC Nefrologia</td>
+<td>Nephrology procedures</td>
+</tr>
+<tr class="even">
+<td>AQ</td>
+<td>APAC Quimioterapia</td>
+<td>Oncology chemotherapy</td>
+</tr>
+<tr class="odd">
+<td>AR</td>
+<td>APAC Radioterapia</td>
+<td>Oncology radiotherapy</td>
+</tr>
+<tr class="even">
+<td>AB</td>
+<td>APAC Cirurgia Bariatrica</td>
+<td>Bariatric surgery</td>
+</tr>
+<tr class="odd">
+<td>ACF</td>
+<td>APAC Confeccao de Fistula</td>
+<td>Arteriovenous fistula</td>
+</tr>
+<tr class="even">
+<td>ATD</td>
+<td>APAC Tratamento Dialitico</td>
+<td>Dialysis</td>
+</tr>
+<tr class="odd">
+<td>AMP</td>
+<td>APAC Acompanhamento Multiprofissional</td>
+<td>Multiprofessional follow-up</td>
+</tr>
+<tr class="even">
+<td>SAD</td>
+<td>RAAS Atencao Domiciliar</td>
+<td>Home care services</td>
+</tr>
+<tr class="odd">
+<td>PS</td>
+<td>RAAS Psicossocial</td>
+<td>CAPS and psychosocial services</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="basic-download-3" class="section level3">
+<h3>Basic download</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># outpatient production in Acre, January 2022 (default type = &quot;PA&quot;)</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>ambul_jan <span class="ot">&lt;-</span> <span class="fu">sia_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>ambul_jan</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co"># different file type: high-cost medications</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>med <span class="ot">&lt;-</span> <span class="fu">sia_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">type =</span> <span class="st">&quot;AM&quot;</span>)</span></code></pre></div>
+</div>
+<div id="filter-by-procedure-and-diagnosis" class="section level3">
+<h3>Filter by procedure and diagnosis</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># filter by SIGTAP procedure code (prefix match on PA_PROC_ID)</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>consult <span class="ot">&lt;-</span> <span class="fu">sia_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">procedure =</span> <span class="st">&quot;0301&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co"># filter by CID-10 diagnosis (prefix match on PA_CIDPRI)</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">sia_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">diagnosis =</span> <span class="st">&quot;J&quot;</span>)</span></code></pre></div>
+</div>
+<div id="key-variables-pa-type" class="section level3">
+<h3>Key variables (PA type)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>PA_PROC_ID</code></td>
+<td>Procedure code (SIGTAP)</td>
+</tr>
+<tr class="even">
+<td><code>PA_CIDPRI</code></td>
+<td>Principal diagnosis (CID-10)</td>
+</tr>
+<tr class="odd">
+<td><code>PA_SEXO</code></td>
+<td>Sex (1 = Male, 2 = Female)</td>
+</tr>
+<tr class="even">
+<td><code>PA_IDADE</code></td>
+<td>Patient age</td>
+</tr>
+<tr class="odd">
+<td><code>PA_VALAPR</code></td>
+<td>Approved value (R$)</td>
+</tr>
+<tr class="even">
+<td><code>PA_QTDAPR</code></td>
+<td>Approved quantity</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="example-production-by-procedure-group" class="section level3">
+<h3>Example: production by procedure group</h3>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>ambul <span class="ot">&lt;-</span> <span class="fu">sia_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>ambul <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">proc_group =</span> <span class="fu">substr</span>(PA_PROC_ID, <span class="dv">1</span>, <span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  <span class="fu">count</span>(proc_group, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="sinan-notifiable-diseases" class="section level2">
+<h2>SINAN – Notifiable diseases</h2>
+<p>The SINAN (Sistema de Informacao de Agravos de Notificacao) contains
+individual notification records for 31 compulsorily notifiable diseases.
+Unlike other DATASUS modules, SINAN files are <strong>national</strong>
+(one file per disease per year, covering all of Brazil).</p>
+<div id="available-diseases" class="section level3">
+<h3>Available diseases</h3>
+<p>SINAN covers 31 diseases. Use <code>sinan_diseases()</code> to see
+all available codes:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">sinan_diseases</span>()</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 31 x 3</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="co">#&gt;    code  name                      description</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt; &lt;chr&gt;                     &lt;chr&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="co">#&gt;  1 DENG  Dengue                    Dengue</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co">#&gt;  2 CHIK  Chikungunya               Febre de Chikungunya</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">#&gt;  3 ZIKA  Zika                      Zika virus</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt;  4 TUBE  Tuberculose               Tuberculose</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#&gt;  ...</span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co"># search for a specific disease</span></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="fu">sinan_diseases</span>(<span class="at">search =</span> <span class="st">&quot;sifilis&quot;</span>)</span></code></pre></div>
+</div>
+<div id="basic-download-4" class="section level3">
+<h3>Basic download</h3>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># dengue notifications, 2022 (default disease)</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>dengue <span class="ot">&lt;-</span> <span class="fu">sinan_data</span>(<span class="at">year =</span> <span class="dv">2022</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co"># tuberculosis notifications, 2020-2022</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>tb <span class="ot">&lt;-</span> <span class="fu">sinan_data</span>(<span class="at">year =</span> <span class="dv">2020</span><span class="sc">:</span><span class="dv">2022</span>, <span class="at">disease =</span> <span class="st">&quot;TUBE&quot;</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="co"># select specific variables</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="fu">sinan_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">disease =</span> <span class="st">&quot;DENG&quot;</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>           <span class="at">vars =</span> <span class="fu">c</span>(<span class="st">&quot;DT_NOTIFIC&quot;</span>, <span class="st">&quot;CS_SEXO&quot;</span>, <span class="st">&quot;NU_IDADE_N&quot;</span>,</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>                    <span class="st">&quot;ID_MUNICIP&quot;</span>, <span class="st">&quot;CLASSI_FIN&quot;</span>))</span></code></pre></div>
+</div>
+<div id="filtering-by-state" class="section level3">
+<h3>Filtering by state</h3>
+<p>Since files are national, filter by UF after download:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>dengue <span class="ot">&lt;-</span> <span class="fu">sinan_data</span>(<span class="at">year =</span> <span class="dv">2022</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co"># filter by state of notification</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>dengue_sp <span class="ot">&lt;-</span> dengue <span class="sc">|&gt;</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>  <span class="fu">filter</span>(SG_UF_NOT <span class="sc">==</span> <span class="st">&quot;35&quot;</span>)  <span class="co"># Sao Paulo (IBGE code)</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co"># or by municipality</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>dengue_rio <span class="ot">&lt;-</span> dengue <span class="sc">|&gt;</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">substr</span>(ID_MUNICIP, <span class="dv">1</span>, <span class="dv">2</span>) <span class="sc">==</span> <span class="st">&quot;33&quot;</span>)  <span class="co"># Rio de Janeiro state</span></span></code></pre></div>
+</div>
+<div id="key-variables-3" class="section level3">
+<h3>Key variables</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>DT_NOTIFIC</code></td>
+<td>Notification date</td>
+</tr>
+<tr class="even">
+<td><code>ID_AGRAVO</code></td>
+<td>Disease code (CID-10)</td>
+</tr>
+<tr class="odd">
+<td><code>CS_SEXO</code></td>
+<td>Sex (M = Male, F = Female, I = Unknown)</td>
+</tr>
+<tr class="even">
+<td><code>NU_IDADE_N</code></td>
+<td>Age (encoded: 1st digit = unit, digits 2-4 = value)</td>
+</tr>
+<tr class="odd">
+<td><code>ID_MUNICIP</code></td>
+<td>Municipality of notification (IBGE code)</td>
+</tr>
+<tr class="even">
+<td><code>CLASSI_FIN</code></td>
+<td>Final classification (1 = Confirmed, 2 = Discarded)</td>
+</tr>
+<tr class="odd">
+<td><code>EVOLUCAO</code></td>
+<td>Outcome (1 = Cure, 2 = Death from disease)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="example-confirmed-dengue-by-month" class="section level3">
+<h3>Example: confirmed dengue by month</h3>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>dengue <span class="ot">&lt;-</span> <span class="fu">sinan_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">disease =</span> <span class="st">&quot;DENG&quot;</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>dengue <span class="sc">|&gt;</span></span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>  <span class="fu">filter</span>(CLASSI_FIN <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;1&quot;</span>, <span class="st">&quot;5&quot;</span>)) <span class="sc">|&gt;</span>  <span class="co"># confirmed cases</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">month =</span> <span class="fu">substr</span>(DT_NOTIFIC, <span class="dv">4</span>, <span class="dv">5</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>  <span class="fu">count</span>(month, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="cnes-health-facility-registry" class="section level2">
+<h2>CNES – Health facility registry</h2>
+<p>The CNES (Cadastro Nacional de Estabelecimentos de Saude) is the
+national registry of all health facilities in Brazil. Like SIH and SIA,
+data is organized <strong>monthly</strong> (one file per type/UF/month),
+and there are <strong>13 file types</strong> covering different aspects
+of the registry.</p>
+<div id="file-types-1" class="section level3">
+<h3>File types</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ST</td>
+<td>Estabelecimentos</td>
+<td>Facility registry (default)</td>
+</tr>
+<tr class="even">
+<td>LT</td>
+<td>Leitos</td>
+<td>Hospital beds</td>
+</tr>
+<tr class="odd">
+<td>PF</td>
+<td>Profissional</td>
+<td>Health professionals</td>
+</tr>
+<tr class="even">
+<td>DC</td>
+<td>Dados Complementares</td>
+<td>Complementary facility data</td>
+</tr>
+<tr class="odd">
+<td>EQ</td>
+<td>Equipamentos</td>
+<td>Health equipment</td>
+</tr>
+<tr class="even">
+<td>SR</td>
+<td>Servico Especializado</td>
+<td>Specialized services</td>
+</tr>
+<tr class="odd">
+<td>HB</td>
+<td>Habilitacao</td>
+<td>Facility certifications</td>
+</tr>
+<tr class="even">
+<td>EP</td>
+<td>Equipes</td>
+<td>Health teams</td>
+</tr>
+<tr class="odd">
+<td>RC</td>
+<td>Regra Contratual</td>
+<td>Contractual rules</td>
+</tr>
+<tr class="even">
+<td>IN</td>
+<td>Incentivos</td>
+<td>Financial incentives</td>
+</tr>
+<tr class="odd">
+<td>EE</td>
+<td>Estab. de Ensino</td>
+<td>Teaching facilities</td>
+</tr>
+<tr class="even">
+<td>EF</td>
+<td>Estab. Filantropico</td>
+<td>Philanthropic facilities</td>
+</tr>
+<tr class="odd">
+<td>GM</td>
+<td>Gestao e Metas</td>
+<td>Management and targets</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="basic-download-5" class="section level3">
+<h3>Basic download</h3>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co"># establishments in Acre, January 2023</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>estab <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="co"># hospital beds</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>leitos <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">type =</span> <span class="st">&quot;LT&quot;</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="co"># health professionals</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>prof <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">type =</span> <span class="st">&quot;PF&quot;</span>)</span></code></pre></div>
+</div>
+<div id="key-variables-st-type" class="section level3">
+<h3>Key variables (ST type)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>CNES</code></td>
+<td>Facility CNES code</td>
+</tr>
+<tr class="even">
+<td><code>CODUFMUN</code></td>
+<td>Municipality (UF + IBGE 6-digit code)</td>
+</tr>
+<tr class="odd">
+<td><code>TP_UNID</code></td>
+<td>Facility type (22 categories)</td>
+</tr>
+<tr class="even">
+<td><code>VINC_SUS</code></td>
+<td>SUS-linked (0 = No, 1 = Yes)</td>
+</tr>
+<tr class="odd">
+<td><code>TP_GESTAO</code></td>
+<td>Management type (M = Municipal, E = State, D = Dual)</td>
+</tr>
+<tr class="even">
+<td><code>ESFERA_A</code></td>
+<td>Administrative sphere (1-4)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="example-facility-types-in-a-state" class="section level3">
+<h3>Example: facility types in a state</h3>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>estab <span class="ot">&lt;-</span> <span class="fu">cnes_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>estab <span class="sc">|&gt;</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>  <span class="fu">count</span>(TP_UNID, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>    <span class="fu">cnes_dictionary</span>(<span class="st">&quot;TP_UNID&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(code, label),</span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;TP_UNID&quot;</span> <span class="ot">=</span> <span class="st">&quot;code&quot;</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+</div>
+<div id="si-pni-vaccination-data" class="section level2">
+<h2>SI-PNI – Vaccination data</h2>
+<p>The SI-PNI (Sistema de Informacao do Programa Nacional de
+Imunizacoes) provides vaccination data from two sources:</p>
+<ul>
+<li><strong>FTP (1994–2019)</strong>: Aggregated data with dose counts
+and coverage rates per municipality/vaccine/age group. Plain .DBF files
+(not DBC-compressed).</li>
+<li><strong>OpenDataSUS API (2020–2025)</strong>: Individual-level
+microdata with one row per vaccination dose (~47 fields per
+record).</li>
+</ul>
+<p><code>sipni_data()</code> transparently routes to the correct source
+based on the requested year.</p>
+<div id="file-types-2" class="section level3">
+<h3>File types</h3>
+<table>
+<colgroup>
+<col width="24%" />
+<col width="24%" />
+<col width="52%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DPNI</td>
+<td>Doses Aplicadas</td>
+<td>Doses applied per municipality, age group, vaccine, and dose type
+(FTP, default)</td>
+</tr>
+<tr class="even">
+<td>CPNI</td>
+<td>Cobertura Vacinal</td>
+<td>Vaccination coverage per municipality and vaccine (FTP)</td>
+</tr>
+<tr class="odd">
+<td>API</td>
+<td>Microdados</td>
+<td>Individual-level microdata via OpenDataSUS (2020+, automatic)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="basic-download-6" class="section level3">
+<h3>Basic download</h3>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># FTP: doses applied in Acre, 2019 (default type = &quot;DPNI&quot;)</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>doses_ac <span class="ot">&lt;-</span> <span class="fu">sipni_data</span>(<span class="at">year =</span> <span class="dv">2019</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>doses_ac</span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="co"># FTP: vaccination coverage</span></span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a>cob_ac <span class="ot">&lt;-</span> <span class="fu">sipni_data</span>(<span class="at">year =</span> <span class="dv">2019</span>, <span class="at">type =</span> <span class="st">&quot;CPNI&quot;</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="co"># API: individual-level microdata, Acre, January 2024</span></span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a>micro_ac <span class="ot">&lt;-</span> <span class="fu">sipni_data</span>(<span class="at">year =</span> <span class="dv">2024</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">month =</span> <span class="dv">1</span>)</span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a>micro_ac</span></code></pre></div>
+</div>
+<div id="key-variables-dpni" class="section level3">
+<h3>Key variables (DPNI)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>IMUNO</code></td>
+<td>Vaccine code (immunobiological)</td>
+</tr>
+<tr class="even">
+<td><code>QT_DOSE</code></td>
+<td>Number of doses applied</td>
+</tr>
+<tr class="odd">
+<td><code>DOSE</code></td>
+<td>Dose type (1st, 2nd, booster, etc.)</td>
+</tr>
+<tr class="even">
+<td><code>FX_ETARIA</code></td>
+<td>Age group (coded)</td>
+</tr>
+<tr class="odd">
+<td><code>MUNIC</code></td>
+<td>Municipality (IBGE 6-digit code)</td>
+</tr>
+<tr class="even">
+<td><code>ANOMES</code></td>
+<td>Year and month (YYYYMM)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="key-variables-cpni" class="section level3">
+<h3>Key variables (CPNI)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>IMUNO</code></td>
+<td>Vaccine code</td>
+</tr>
+<tr class="even">
+<td><code>QT_DOSE</code></td>
+<td>Number of doses applied</td>
+</tr>
+<tr class="odd">
+<td><code>POP</code></td>
+<td>Target population</td>
+</tr>
+<tr class="even">
+<td><code>COBERT</code></td>
+<td>Vaccination coverage (%)</td>
+</tr>
+<tr class="odd">
+<td><code>MUNIC</code></td>
+<td>Municipality (IBGE 6-digit code)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="example-doses-by-vaccine" class="section level3">
+<h3>Example: doses by vaccine</h3>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>doses <span class="ot">&lt;-</span> <span class="fu">sipni_data</span>(<span class="at">year =</span> <span class="dv">2019</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>doses <span class="sc">|&gt;</span></span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>  <span class="fu">group_by</span>(IMUNO) <span class="sc">|&gt;</span></span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">total_doses =</span> <span class="fu">sum</span>(<span class="fu">as.numeric</span>(QT_DOSE), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total_doses)) <span class="sc">|&gt;</span></span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a>    <span class="fu">sipni_dictionary</span>(<span class="st">&quot;IMUNO&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(code, label),</span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;IMUNO&quot;</span> <span class="ot">=</span> <span class="st">&quot;code&quot;</span>)</span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+</div>
+<div id="cross-module-analyses" class="section level2">
+<h2>Cross-module analyses</h2>
+<p>A key strength of <code>healthbR</code> is the ability to combine
+data from different DATASUS modules and Census denominators in a single
+workflow. Below are three practical examples.</p>
+<div id="mortality-rate-sim-census" class="section level3">
+<h3>Mortality rate (SIM + Census)</h3>
+<p>Calculate the crude cardiovascular mortality rate per 100,000
+population:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="co"># step 1: count cardiovascular deaths in Sao Paulo, 2022</span></span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>obitos_cardio <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>, <span class="at">cause =</span> <span class="st">&quot;I&quot;</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>n_obitos <span class="ot">&lt;-</span> <span class="fu">nrow</span>(obitos_cardio)</span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a><span class="co"># step 2: get population denominator from Census 2022</span></span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a>pop_sp <span class="ot">&lt;-</span> <span class="fu">censo_populacao</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">territorial_level =</span> <span class="st">&quot;state&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">&quot;Paulo&quot;</span>, territorial_unit))</span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a><span class="co"># step 3: calculate rate</span></span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a>taxa_mortalidade <span class="ot">&lt;-</span> n_obitos <span class="sc">/</span> pop_sp<span class="sc">$</span>population <span class="sc">*</span> <span class="dv">100000</span></span>
+<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a>taxa_mortalidade</span></code></pre></div>
+</div>
+<div id="live-births-to-deaths-ratio-sinasc-sim" class="section level3">
+<h3>Live births to deaths ratio (SINASC + SIM)</h3>
+<p>Compare the number of live births and deaths in a state:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># births and deaths in Acre, 2022</span></span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>nascimentos <span class="ot">&lt;-</span> <span class="fu">sinasc_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>obitos <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>razao <span class="ot">&lt;-</span> <span class="fu">nrow</span>(nascimentos) <span class="sc">/</span> <span class="fu">nrow</span>(obitos)</span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>razao</span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a><span class="co">#&gt; ratio &gt; 1 means more births than deaths (population growth)</span></span></code></pre></div>
+</div>
+<div id="hospital-vs.-outpatient-care-sih-sia" class="section level3">
+<h3>Hospital vs. outpatient care (SIH + SIA)</h3>
+<p>Compare volumes and costs of respiratory care (CID-10 chapter J)
+between hospital and outpatient settings:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="co"># hospital admissions for respiratory diseases, January 2022</span></span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>intern_resp <span class="ot">&lt;-</span> <span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">diagnosis =</span> <span class="st">&quot;J&quot;</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a><span class="co"># outpatient production for respiratory diseases, January 2022</span></span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>ambul_resp <span class="ot">&lt;-</span> <span class="fu">sia_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">diagnosis =</span> <span class="st">&quot;J&quot;</span>)</span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a><span class="co"># compare volumes</span></span>
+<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a>n_internacoes <span class="ot">&lt;-</span> <span class="fu">nrow</span>(intern_resp)</span>
+<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a>n_ambulatorial <span class="ot">&lt;-</span> <span class="fu">nrow</span>(ambul_resp)</span>
+<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a></span>
+<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a><span class="co"># compare costs</span></span>
+<span id="cb26-12"><a href="#cb26-12" tabindex="-1"></a>custo_intern <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">as.numeric</span>(intern_resp<span class="sc">$</span>VAL_TOT), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb26-13"><a href="#cb26-13" tabindex="-1"></a>custo_ambul <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">as.numeric</span>(ambul_resp<span class="sc">$</span>PA_VALAPR), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb26-14"><a href="#cb26-14" tabindex="-1"></a></span>
+<span id="cb26-15"><a href="#cb26-15" tabindex="-1"></a>tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb26-16"><a href="#cb26-16" tabindex="-1"></a>  <span class="at">setting =</span> <span class="fu">c</span>(<span class="st">&quot;Hospital (SIH)&quot;</span>, <span class="st">&quot;Outpatient (SIA)&quot;</span>),</span>
+<span id="cb26-17"><a href="#cb26-17" tabindex="-1"></a>  <span class="at">records =</span> <span class="fu">c</span>(n_internacoes, n_ambulatorial),</span>
+<span id="cb26-18"><a href="#cb26-18" tabindex="-1"></a>  <span class="at">total_cost_brl =</span> <span class="fu">c</span>(custo_intern, custo_ambul)</span>
+<span id="cb26-19"><a href="#cb26-19" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+</div>
+<div id="cache-and-performance" class="section level2">
+<h2>Cache and performance</h2>
+<div id="automatic-caching" class="section level3">
+<h3>Automatic caching</h3>
+<p>All DATASUS modules cache downloaded data automatically. When the
+<code>arrow</code> package is installed, data is saved in Parquet format
+(fast and compact); otherwise, .rds is used as fallback.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="co"># install arrow for optimized caching (recommended)</span></span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;arrow&quot;</span>)</span></code></pre></div>
+</div>
+<div id="cache-management" class="section level3">
+<h3>Cache management</h3>
+<p>Each module provides <code>*_cache_status()</code> and
+<code>*_clear_cache()</code>:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="co"># check what is cached</span></span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a><span class="fu">sim_cache_status</span>()</span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a><span class="fu">sih_cache_status</span>()</span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a><span class="fu">sia_cache_status</span>()</span>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a><span class="co"># clear cache for a specific module</span></span>
+<span id="cb28-7"><a href="#cb28-7" tabindex="-1"></a><span class="fu">sim_clear_cache</span>()</span></code></pre></div>
+</div>
+<div id="tips-for-managing-downloads" class="section level3">
+<h3>Tips for managing downloads</h3>
+<ul>
+<li><strong>Use <code>uf</code></strong> to download only the states you
+need instead of all 27 (SIM, SINASC, SIH, SIA, CNES).</li>
+<li><strong>Use <code>month</code></strong> (SIH, SIA, CNES) to limit
+monthly downloads. Downloading a full year for all states requires 324
+files per module (27 UFs x 12 months).</li>
+<li><strong>Use <code>vars</code></strong> to keep only the variables
+you need, reducing memory usage.</li>
+<li>SIM and SINASC are annual (one file per UF per year), so a full-year
+download is 27 files.</li>
+<li>SINAN files are national (one file per disease per year), so
+downloads are fast but files can be large.</li>
+<li>SIH, SIA, and CNES are monthly, so a full-year download is 324 files
+per type. SIA and CNES each have 13 file types – always filter by
+<code>type</code>, <code>uf</code>, and <code>month</code>.</li>
+<li>SI-PNI FTP is annual with plain .DBF files (one per type/UF/year,
+1994–2019). API data (2020+) is per-UF/year; use <code>month</code> to
+limit months.</li>
+</ul>
+</div>
+</div>
+<div id="additional-resources" class="section level2">
+<h2>Additional resources</h2>
+<ul>
+<li>DATASUS TabNet (<code>datasus.saude.gov.br</code>) – online
+tabulation tool for DATASUS data</li>
+<li>DATASUS FTP (<code>ftp.datasus.gov.br</code>) – public FTP server
+with raw data files</li>
+<li><a href="https://icd.who.int/browse10/2019/en">CID-10 (WHO
+ICD-10)</a> – International Classification of Diseases, 10th
+revision</li>
+<li>SIGTAP (<code>wiki.saude.gov.br/sigtap</code>) – procedure code
+table for SUS (SIA/SIH)</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
