@@ -4,37 +4,91 @@
 \alias{sipni_dictionary}
 \title{SI-PNI Data Dictionary}
 \usage{
-sipni_dictionary(variable = NULL)
+sipni_dictionary(
+  variable = NULL,
+  source = c("r2", "datasus"),
+  cache = TRUE,
+  cache_dir = NULL,
+  lookup = FALSE
+)
 }
 \arguments{
 \item{variable}{Character. If provided, returns dictionary for a specific
 variable only. Default: NULL (returns all variables).}
+
+\item{source}{Character vector. \code{"r2"} (default) reads the full
+dictionaries published by the healthbr-data mirror (converted from the
+Ministry's original .cnv/.dbf files, including the \code{source_codes}
+traceability column); \code{"datasus"} uses the abridged dictionary
+built into the package. With the default \code{c("r2", "datasus")},
+the built-in dictionary is used automatically if the mirror is
+unreachable.}
+
+\item{cache}{Logical. If TRUE (default), caches the R2 dictionary
+locally after the first read.}
+
+\item{cache_dir}{Character. Cache directory. Default:
+\code{tools::R_user_dir("healthbR", "cache")}.}
+
+\item{lookup}{Logical. If TRUE, returns a \strong{data-code lookup}: one row
+per value as it appears in the data columns (the .cnv
+\code{source_codes}, expanded), ready to join against
+\code{sipni_data()} results. Default FALSE returns the dictionaries in
+their published form. See Details -- for decoding data you almost
+always want \code{lookup = TRUE}.}
 }
 \value{
-A tibble with columns: variable, description, code, label.
+A tibble with columns: variable, description, code, label (and
+\code{source_codes} when served from R2 with \code{lookup = FALSE} --
+the original data codes each dictionary entry groups, for
+traceability to the .cnv files).
 }
 \description{
-Returns a tibble with the data dictionary for the SI-PNI FTP data
+Returns a tibble with the data dictionary for the SI-PNI aggregated data
 (1994--2019), including variable descriptions and category labels.
 }
 \details{
-The dictionary covers FTP data variables (DPNI/CPNI, 1994--2019).
+The dictionary covers aggregated data variables (DPNI/CPNI, 1994--2019):
+IMUNO (separately for doses and coverage), DOSE, FX_ETARIA, ANO, MES.
 API microdata (2020+) has description fields embedded in the data
-itself (e.g., \code{descricao_vacina}, \code{nome_raca_cor_paciente}),
+itself (e.g., \code{ds_vacina}, \code{no_raca_cor_paciente}),
 so a separate dictionary is not needed.
+
+\strong{code vs source_codes.} In the Ministry's .cnv dictionary files,
+\code{code} is a sequential category code and \code{source_codes} holds
+the value(s) actually found in the data -- possibly several per label
+(comma-separated or ranges), reflecting code changes over the years.
+Joining data against \code{code} silently decodes to the wrong labels.
+Use \code{lookup = TRUE} to get one row per data code. When more than
+one category claims the same data code, the more specific claim wins:
+explicitly listed codes take precedence over codes that only fall
+inside a range -- ranges are residual catch-alls by construction (e.g.
+FX_ETARIA "Idade ignorada" spans \code{00-99} and must not override the
+explicit age groups). The built-in fallback dictionary
+(\code{source = "datasus"}) is already stored as a data-code lookup, so
+\code{lookup} has no effect there.
 }
 \examples{
+# built-in fallback dictionary: no network, no cache
+sipni_dictionary(source = "datasus")
+sipni_dictionary("IMUNO", source = "datasus")
+
+# join-ready lookup (data code -> label)
+sipni_dictionary("IMUNO", source = "datasus", lookup = TRUE)
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
+# official .cnv dictionaries from the healthbr-data mirror (downloads once)
 sipni_dictionary()
-sipni_dictionary("IMUNO")
 sipni_dictionary("DOSE")
+\dontshow{\}) # examplesIf}
 }
 \seealso{
-Other sipni: 
-\code{\link{sipni_cache_status}()},
-\code{\link{sipni_clear_cache}()},
-\code{\link{sipni_data}()},
-\code{\link{sipni_info}()},
-\code{\link{sipni_variables}()},
-\code{\link{sipni_years}()}
+Other sipni:
+\code{\link[=sipni_cache_status]{sipni_cache_status()}},
+\code{\link[=sipni_clear_cache]{sipni_clear_cache()}},
+\code{\link[=sipni_data]{sipni_data()}},
+\code{\link[=sipni_info]{sipni_info()}},
+\code{\link[=sipni_status]{sipni_status()}},
+\code{\link[=sipni_variables]{sipni_variables()}},
+\code{\link[=sipni_years]{sipni_years()}}
 }
 \concept{sipni}

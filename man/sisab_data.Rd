@@ -73,6 +73,13 @@ National Health Survey. Available 2020--2023.
 
 For municipality-level data, it is recommended to filter by UF using the
 \code{uf} parameter to avoid large downloads.
+\subsection{Parallel downloads}{
+
+When downloading multiple months, install \pkg{furrr} and \pkg{future} and
+set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
@@ -93,11 +100,11 @@ sisab_data(year = 2024, level = "municipality", uf = "SP", month = 1)
 \code{\link{sisab_info}()} for report type descriptions,
 \code{\link{censo_populacao}()} for population denominators.
 
-Other sisab: 
-\code{\link{sisab_cache_status}()},
-\code{\link{sisab_clear_cache}()},
-\code{\link{sisab_info}()},
-\code{\link{sisab_variables}()},
-\code{\link{sisab_years}()}
+Other sisab:
+\code{\link[=sisab_cache_status]{sisab_cache_status()}},
+\code{\link[=sisab_clear_cache]{sisab_clear_cache()}},
+\code{\link[=sisab_info]{sisab_info()}},
+\code{\link[=sisab_variables]{sisab_variables()}},
+\code{\link[=sisab_years]{sisab_years()}}
 }
 \concept{sisab}

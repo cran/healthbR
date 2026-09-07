@@ -82,6 +82,13 @@ Available from 2011.
 \strong{Financial}: Quarterly ZIP files with financial statements of
 health plan operators (balance sheets, income statements).
 Available from 2007.
+\subsection{Parallel downloads}{
+
+When downloading multiple files (e.g., several months or quarters), install
+\pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
@@ -99,12 +106,12 @@ fin <- ans_data(year = 2023, type = "financial", quarter = 1)
 \code{\link{ans_operators}()} for the operator registry,
 \code{\link{ans_variables}()} for variable descriptions.
 
-Other ans: 
-\code{\link{ans_cache_status}()},
-\code{\link{ans_clear_cache}()},
-\code{\link{ans_info}()},
-\code{\link{ans_operators}()},
-\code{\link{ans_variables}()},
-\code{\link{ans_years}()}
+Other ans:
+\code{\link[=ans_cache_status]{ans_cache_status()}},
+\code{\link[=ans_clear_cache]{ans_clear_cache()}},
+\code{\link[=ans_info]{ans_info()}},
+\code{\link[=ans_operators]{ans_operators()}},
+\code{\link[=ans_variables]{ans_variables()}},
+\code{\link[=ans_years]{ans_years()}}
 }
 \concept{ans}

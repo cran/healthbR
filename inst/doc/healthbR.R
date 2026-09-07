@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 
 ## -----------------------------------------------------------------------------
 # list_sources()
-# #> # A tibble: 13 x 5
+# #> # A tibble: 16 x 5
 # #>    source  name                         description                    years       status
 # #>    <chr>   <chr>                        <chr>                          <chr>       <chr>
 # #>  1 vigitel VIGITEL                      Telephone survey on chronic... 2006-2024   available
@@ -208,6 +208,41 @@ knitr::opts_chunk$set(
 # sisab_variables(type = "sb")
 
 ## -----------------------------------------------------------------------------
+# # module overview
+# ans_info()
+# 
+# # beneficiaries by state, January 2024
+# benef <- ans_data(type = "beneficiaries", year = 2024, month = 1, uf = "SP")
+# 
+# # consumer complaints, 2023
+# reclamacoes <- ans_data(type = "complaints", year = 2023)
+# 
+# # operator financial data, 2024 Q1
+# financeiro <- ans_data(type = "financial", year = 2024, quarter = 1)
+# 
+# # health plan operator registry
+# operadoras <- ans_operators()
+# 
+# # explore variables
+# ans_variables(type = "beneficiaries")
+
+## -----------------------------------------------------------------------------
+# # see all available data types
+# anvisa_types()
+# 
+# # registered medicines
+# medicamentos <- anvisa_data(type = "medicines")
+# 
+# # pharmacovigilance notifications (VigiMed)
+# vigimed <- anvisa_data(type = "vigimed_notifications")
+# 
+# # controlled substance dispensing (SNGPC), monthly time-series
+# sngpc <- anvisa_data(type = "sngpc", year = 2024, month = 1:6)
+# 
+# # explore variables
+# anvisa_variables(type = "medicines")
+
+## -----------------------------------------------------------------------------
 # install.packages("arrow")
 
 ## -----------------------------------------------------------------------------
@@ -220,6 +255,21 @@ knitr::opts_chunk$set(
 # 
 # # use a custom cache directory (e.g., for temporary use)
 # sim_data(year = 2022, uf = "AC", cache_dir = tempdir())
+
+## -----------------------------------------------------------------------------
+# install.packages(c("furrr", "future"))
+
+## -----------------------------------------------------------------------------
+# library(future)
+# 
+# # use multiple R sessions (e.g., 4 workers)
+# plan(multisession, workers = 4)
+# 
+# # downloads now run in parallel across workers
+# df <- sih_data(year = 2020:2023, month = 1:6, uf = "SP")
+# 
+# # return to sequential mode when done
+# plan(sequential)
 
 ## -----------------------------------------------------------------------------
 # library(dplyr)

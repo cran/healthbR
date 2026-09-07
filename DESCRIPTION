@@ -1,6 +1,6 @@
 Package: healthbR
 Title: Access Brazilian Public Health Data
-Version: 0.2.0
+Version: 0.4.0
 Authors@R: 
     person("Sidney", "Bissoli", , "sbissoli76@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0001-0442-3700"))
@@ -21,26 +21,30 @@ Description: Provides easy access to Brazilian public health data from multiple
     'ANVISA' ('Agencia Nacional de Vigilancia Sanitaria' - product registrations,
     'pharmacovigilance', 'hemovigilance', 'technovigilance', and controlled
     substance sales via 'SNGPC'),
-    and other health information systems. Data is downloaded
-    from the Brazilian Ministry of Health and 'IBGE' repositories. Data is returned
-    in tidy format following tidyverse conventions.
+    and other health information systems. Data is downloaded from 'DATASUS'
+    (the Ministry of Health's informatics department: compressed '.dbc'
+    microdata read natively, or the healthbr-data 'Parquet' mirror with
+    per-file provenance) and from 'IBGE' repositories, and is returned in tidy
+    format following tidyverse conventions. A vignette compares the package
+    with 'microdatasus' on the 'DATASUS' systems both read.
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.3.3
 Depends: R (>= 4.2.0)
 Imports: tibble, dplyr, curl, cli, rlang, stringr, purrr, readr,
         jsonlite, foreign
 Suggests: testthat (>= 3.1.5), knitr, rmarkdown, readxl, haven, furrr,
-        future, arrow, dbplyr, duckdb, piggyback, survey, srvyr
+        future, arrow, dbplyr, duckdb, piggyback, survey, srvyr, withr,
+        writexl
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: https://github.com/SidneyBissoli/healthbR,
         https://sidneybissoli.github.io/healthbR/
 BugReports: https://github.com/SidneyBissoli/healthbR/issues
+Config/roxygen2/version: 8.0.0
 NeedsCompilation: yes
-Packaged: 2026-02-15 21:11:54 UTC; SIDNEY
+Packaged: 2026-09-07 01:04:20 UTC; SIDNEY
 Author: Sidney Bissoli [aut, cre] (ORCID:
     <https://orcid.org/0009-0001-0442-3700>)
 Maintainer: Sidney Bissoli <sbissoli76@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-02-15 21:30:03 UTC
+Date/Publication: 2026-09-07 06:40:25 UTC

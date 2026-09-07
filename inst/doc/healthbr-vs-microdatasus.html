@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>healthbR vs microdatasus: reading DATASUS microdata (SIM, SINASC, SIH) in R</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">healthbR vs microdatasus: reading DATASUS
+microdata (SIM, SINASC, SIH) in R</h1>
+
+
+
+<div id="why-this-vignette" class="section level2">
+<h2>Why this vignette</h2>
+<p>If you read DATASUS microdata in R – deaths from SIM, live births
+from SINASC, hospital admissions from SIH – you have two packages to
+choose from: <a href="https://CRAN.R-project.org/package=microdatasus">microdatasus</a>,
+by Raphael Saldanha, described in Saldanha et al. (2019) and the usual
+answer to “how do I get DATASUS into R”, and healthbR. They overlap on
+six DATASUS systems and differ in almost everything they do with the
+bytes after the download. This vignette puts the two side by side on the
+<em>same</em> three downloads and shows what each one returns, so you
+can pick the one that fits your workflow – or use both.</p>
+<p>Everything below was measured on 2026-09-05 with healthbR 0.3.1
+(development version), microdatasus 3.0.0, arrow 25.0.0, dplyr 1.2.1 and
+R 4.6.1 on Windows, from a residential connection in Brazil. Timings are
+single runs and will vary with your network; the row counts, column
+types and values will not. Nothing here runs at build time
+(<code>eval = FALSE</code>): the outputs are pasted from that session,
+and the code is complete so you can rerun it.</p>
+</div>
+<div id="what-each-package-covers" class="section level2">
+<h2>What each package covers</h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>healthbR</th>
+<th>microdatasus 3.0.0</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>SIM (mortality)</td>
+<td><code>sim_data()</code>: DO, 1996–2024</td>
+<td><code>&quot;SIM-DO&quot;</code>, <code>&quot;SIM-DOFET&quot;</code>,
+<code>&quot;SIM-DOEXT&quot;</code>, <code>&quot;SIM-DOINF&quot;</code>,
+<code>&quot;SIM-DOMAT&quot;</code></td>
+</tr>
+<tr class="even">
+<td>SINASC (live births)</td>
+<td><code>sinasc_data()</code>: 1996–2024</td>
+<td><code>&quot;SINASC&quot;</code></td>
+</tr>
+<tr class="odd">
+<td>SIH (admissions)</td>
+<td><code>sih_data()</code>: RD (reduced AIH), 2008–2026</td>
+<td><code>&quot;SIH-RD&quot;</code>, <code>&quot;SIH-RJ&quot;</code>, <code>&quot;SIH-SP&quot;</code>,
+<code>&quot;SIH-ER&quot;</code></td>
+</tr>
+<tr class="even">
+<td>SIA (outpatient)</td>
+<td><code>sia_data()</code>: 13 file types, 2008–2026</td>
+<td>12 file types</td>
+</tr>
+<tr class="odd">
+<td>CNES (facilities)</td>
+<td><code>cnes_data()</code>: 13 file types, 2005–2026</td>
+<td>13 file types</td>
+</tr>
+<tr class="even">
+<td>SINAN (notifiable diseases)</td>
+<td><code>sinan_data()</code>: 31 diseases, 2007–2026</td>
+<td>8 diseases (dengue, chikungunya, zika, malaria, Chagas, visceral and
+cutaneous leishmaniasis, leptospirosis)</td>
+</tr>
+<tr class="odd">
+<td>SI-PNI (vaccination)</td>
+<td><code>sipni_data()</code>: 1994–2026</td>
+<td>–</td>
+</tr>
+<tr class="even">
+<td>SISAB (primary care)</td>
+<td><code>sisab_data()</code></td>
+<td>–</td>
+</tr>
+<tr class="odd">
+<td>Surveys</td>
+<td>VIGITEL, PNS, PNAD Continua, POF, Censo denominators</td>
+<td>–</td>
+</tr>
+<tr class="even">
+<td>Regulatory agencies</td>
+<td>ANS, ANVISA</td>
+<td>–</td>
+</tr>
+<tr class="odd">
+<td>Auxiliary tables</td>
+<td><code>*_dictionary()</code>, <code>*_variables()</code> per
+module</td>
+<td>SIGTAP (<code>fetch_sigtab()</code>), CADGER
+(<code>fetch_cadger()</code>), <code>tabMun</code>, <code>tabCBO</code>,
+<code>tabOcupacao</code>, <code>tabNaturalidade</code></td>
+</tr>
+</tbody>
+</table>
+<p>microdatasus goes deeper into SIM and SIH (the fetal, external-cause,
+infant and maternal SIM extracts; the RJ, SP and ER SIH files) and ships
+the SIGTAP procedure table. healthbR goes wider: more SINAN diseases,
+SI-PNI, SISAB, the household surveys and the regulatory agencies, all
+under one <code>*_years()</code> / <code>*_data()</code> /
+<code>*_dictionary()</code> API.</p>
+</div>
+<div id="the-same-reader-two-philosophies" class="section level2">
+<h2>The same reader, two philosophies</h2>
+<p>Both packages decompress the Ministry’s <code>.dbc</code> files (DBF
+compressed with PKWare DCL) with the same vendored C code: microdatasus
+3.0.0 dropped its dependency on <code>read.dbc</code> and adopted the
+implementation from healthbR (its NEWS says so, and thanks the author).
+So the <em>bytes</em> the two packages read are identical; the
+difference starts right after.</p>
+<p><strong>healthbR keeps the codes and types the columns.</strong>
+<code>SEXO</code> stays <code>1</code>/<code>3</code>,
+<code>MORTE</code> stays <code>0</code>/<code>1</code>,
+<code>DT_INTER</code> becomes a <code>Date</code>, <code>VAL_TOT</code>
+a double, <code>IDADE</code> an integer. Labels live in
+<code>sih_dictionary()</code>, <code>sim_dictionary()</code>,
+<code>sinasc_dictionary()</code>, joined when you want them. The default
+<code>parse = TRUE</code> converts only genuinely quantitative and date
+fields; coded categorical fields stay character so they join cleanly
+with the dictionaries and with other years.</p>
+<p><strong>microdatasus separates fetching from processing.</strong>
+<code>fetch_datasus()</code> returns every column as character, exactly
+as the DBF has it. <code>process_sih()</code>,
+<code>process_sim()</code>, <code>process_sinasc()</code> then replace
+the codes with labels (<code>SEXO</code> becomes
+<code>&quot;Masculino&quot;</code>/<code>&quot;Feminino&quot;</code>, <code>MORTE</code>
+becomes <code>&quot;Não&quot;</code>/<code>&quot;Sim&quot;</code>), convert dates, split the
+SIM age field into one column per unit and, with
+<code>municipality_data = TRUE</code>, join municipality names,
+coordinates and altitude. The result is a tibble of character
+columns.</p>
+<p>Neither is wrong. Labels are what you want for a table in a report;
+codes are what you want to join against a dictionary, compare years, or
+feed a model. The trap is mixing the two: after
+<code>process_sih()</code>, <code>MORTE == 1</code> is
+<code>FALSE</code> on every row, and <code>substr(DT_INTER, 5, 6)</code>
+is no longer the month, because both were rewritten. Read the outputs
+below before choosing.</p>
+</div>
+<div id="one-download-in-both-packages-sih-roraima-competence-2023-01" class="section level2">
+<h2>One download in both packages: SIH, Roraima, competence 2023-01</h2>
+<p>Roraima is the smallest SIH file; January 2023 has 4,734 admissions.
+Both runs start from an empty cache.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(healthbR)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(microdatasus)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># healthbR ---------------------------------------------------------------</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>rr_h <span class="ot">&lt;-</span> <span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;RR&quot;</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; ℹ Reading SIH data from R2: 2023/01 (1 UF(s))...</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">dim</span>(rr_h)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; [1] 4734  116</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">vapply</span>(rr_h, <span class="cf">function</span>(x) <span class="fu">class</span>(x)[<span class="dv">1</span>], <span class="st">&quot;&quot;</span>))</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; character      Date   integer   numeric</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt;       101         3         7         5</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co"># microdatasus -------------------------------------------------------------</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>rr_m <span class="ot">&lt;-</span> <span class="fu">fetch_datasus</span>(<span class="at">year_start =</span> <span class="dv">2023</span>, <span class="at">month_start =</span> <span class="dv">1</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>                      <span class="at">year_end =</span> <span class="dv">2023</span>, <span class="at">month_end =</span> <span class="dv">1</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>                      <span class="at">uf =</span> <span class="st">&quot;RR&quot;</span>, <span class="at">information_system =</span> <span class="st">&quot;SIH-RD&quot;</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="fu">dim</span>(rr_m)</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; [1] 4734  113</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">vapply</span>(rr_m, <span class="cf">function</span>(x) <span class="fu">class</span>(x)[<span class="dv">1</span>], <span class="st">&quot;&quot;</span>))</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt; character</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt;       113</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a>rr_mp <span class="ot">&lt;-</span> <span class="fu">process_sih</span>(rr_m)</span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="fu">dim</span>(rr_mp)</span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a><span class="co">#&gt; [1] 4734  121</span></span></code></pre></div>
+<p>Same 4,734 rows; the sets of <code>N_AIH</code> are identical.
+healthbR adds three columns (<code>year</code>, <code>month</code>,
+<code>uf_source</code>: the competence and state the file belongs to,
+which the AIH record itself does not carry); <code>process_sih()</code>
+adds eight (<code>munResStatus</code>, <code>munResTipo</code>,
+<code>munResNome</code>, <code>munResUf</code>, <code>munResLat</code>,
+<code>munResLon</code>, <code>munResAlt</code>,
+<code>munResArea</code>).</p>
+<p>The same five records, three ways:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;N_AIH&quot;</span>, <span class="st">&quot;SEXO&quot;</span>, <span class="st">&quot;COD_IDADE&quot;</span>, <span class="st">&quot;IDADE&quot;</span>, <span class="st">&quot;MORTE&quot;</span>, <span class="st">&quot;DT_INTER&quot;</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>          <span class="st">&quot;DIAG_PRINC&quot;</span>, <span class="st">&quot;MUNIC_RES&quot;</span>, <span class="st">&quot;VAL_TOT&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">as.data.frame</span>(<span class="fu">head</span>(rr_h[cols], <span class="dv">5</span>))</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt;           N_AIH SEXO COD_IDADE IDADE MORTE   DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; 1 1423100411392    3         4    18     0 2022-12-13       O809    140017   568.80</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; 2 1423100911661    1         4    83     0 2022-12-26       J189    140010   994.59</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; 3 1423100911672    3         4    65     0 2022-12-03       I219    140010   620.12</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; 4 1423100911683    1         4    58     0 2022-12-26       I248    140020   333.08</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; 5 1423100911694    1         4    35     0 2022-11-01       A499    140010 11202.59</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="fu">as.data.frame</span>(<span class="fu">head</span>(rr_m[cols], <span class="dv">5</span>))</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt;           N_AIH SEXO COD_IDADE IDADE MORTE DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; 1 1423100411392    3         4    18     0 20221213       O809    140017    568.8</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; 2 1423100911661    1         4    83     0 20221226       J189    140010   994.59</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; 3 1423100911672    3         4    65     0 20221203       I219    140010   620.12</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; 4 1423100911683    1         4    58     0 20221226       I248    140020   333.08</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; 5 1423100911694    1         4    35     0 20221101       A499    140010 11202.59</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="fu">as.data.frame</span>(<span class="fu">head</span>(rr_mp[<span class="fu">c</span>(cols, <span class="st">&quot;munResNome&quot;</span>)], <span class="dv">5</span>))</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt;           N_AIH      SEXO COD_IDADE IDADE MORTE   DT_INTER DIAG_PRINC MUNIC_RES  VAL_TOT munResNome</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt; 1 1423100411392  Feminino      Anos    18   Não 2022-12-13       O809    140017    568.8      Cantá</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt; 2 1423100911661 Masculino      Anos    83   Não 2022-12-26       J189    140010   994.59  Boa Vista</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; 3 1423100911672  Feminino      Anos    65   Não 2022-12-03       I219    140010   620.12  Boa Vista</span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt; 4 1423100911683 Masculino      Anos    58   Não 2022-12-26       I248    140020   333.08  Caracaraí</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt; 5 1423100911694 Masculino      Anos    35   Não 2022-11-01       A499    140010 11202.59  Boa Vista</span></span></code></pre></div>
+<p>Note <code>DT_INTER</code>: the admissions billed in competence
+2023-01 happened in November and December 2022. In both packages
+<code>year</code>/<code>month</code> (or
+<code>year_start</code>/<code>month_start</code>) select the
+<strong>billing competence</strong>, not the admission date; the
+admissions of a calendar year keep arriving for a few competences after
+it (measured on the whole mirror: the four competences after a year
+close 99.7–99.9% of its admissions). Neither package can change that;
+both should be used with it in mind.</p>
+<p>And the trap, in one line each:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">sum</span>(rr_h<span class="sc">$</span>MORTE <span class="sc">==</span> <span class="dv">1</span>)          <span class="co"># healthbR: integer code</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; [1] 113</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">sum</span>(rr_m<span class="sc">$</span>MORTE <span class="sc">==</span> <span class="st">&quot;1&quot;</span>)        <span class="co"># microdatasus, raw: character code</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; [1] 113</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">sum</span>(rr_mp<span class="sc">$</span>MORTE <span class="sc">==</span> <span class="dv">1</span>)         <span class="co"># microdatasus, processed: the code is gone</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="fu">table</span>(rr_mp<span class="sc">$</span>MORTE)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt;  Não  Sim</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; 4621  113</span></span></code></pre></div>
+<p>Same 113 deaths; the third line is the one that silently returns zero
+in a script written against codes. With healthbR the label is a join
+away:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">sih_dictionary</span>(<span class="st">&quot;MORTE&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2 × 4</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt;   variable description              code  label</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;                    &lt;chr&gt; &lt;chr&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; 1 MORTE    Óbito durante internação 0     Não</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; 2 MORTE    Óbito durante internação 1     Sim</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>rr_h <span class="sc">|&gt;</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="fu">count</span>(MORTE) <span class="sc">|&gt;</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="fu">sih_dictionary</span>(<span class="st">&quot;MORTE&quot;</span>), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;MORTE&quot;</span> <span class="ot">=</span> <span class="st">&quot;code&quot;</span>))</span></code></pre></div>
+<div id="timing" class="section level3">
+<h3>Timing</h3>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>healthbR</th>
+<th>microdatasus</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fresh cache, mirror (manifest of 11,157 partitions + one
+Parquet)</td>
+<td>11.4 s</td>
+<td>–</td>
+</tr>
+<tr class="even">
+<td>Fresh cache, DATASUS FTP <code>.dbc</code>
+(<code>source = &quot;datasus&quot;</code>)</td>
+<td>1.1 s</td>
+<td>2.7 s</td>
+</tr>
+<tr class="odd">
+<td>Same call again in the session</td>
+<td>0.5 s (local Parquet cache)</td>
+<td>downloads again (no cache)</td>
+</tr>
+<tr class="even">
+<td>Labels (<code>process_sih()</code>)</td>
+<td>–</td>
+<td>0.8 s</td>
+</tr>
+<tr class="odd">
+<td>Object size in memory</td>
+<td>4.8 MB</td>
+<td>5.4 MB raw, 5.7 MB processed</td>
+</tr>
+</tbody>
+</table>
+<p>On a 349 KB file the FTP wins the first read: the mirror’s price of
+entry is its 10 MB manifest, downloaded once and revalidated by ETag
+afterwards (<code>sih_status()</code> reads it in 0.4 s from then on).
+The mirror pays back on repeated reads, on lazy queries over many
+competences (next section), and in what comes with the data.</p>
+</div>
+</div>
+<div id="what-comes-with-the-data-provenance" class="section level2">
+<h2>What comes with the data: provenance</h2>
+<p>From the mirror, the tibble carries the source it was served from and
+one row per DATASUS file behind it – URL, MD5 and size of the
+<code>.dbc</code>, record count, when it was processed and by which
+pipeline version:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">attr</span>(rr_h, <span class="st">&quot;healthbr_source&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;r2&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">attr</span>(rr_h, <span class="st">&quot;healthbr_provenance&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="fu">select</span>(year, month, uf, records, source_hash_md5, source_size_bytes,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>         processing_timestamp)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 7</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt;    year month uf    records source_hash_md5                  source_size_bytes processing_timestamp</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt;   &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;                                        &lt;dbl&gt; &lt;chr&gt;</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; 1  2023     1 RR       4734 12e74d4b059589ceb47e4136e3b2ce5f            349244 2026-03-09 03:05:34.463049</span></span></code></pre></div>
+<p><code>sih_status()</code> gives the same for every published
+partition, which is how you find out which competences exist and whether
+the Ministry re-issued a file (the MD5 changes):</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>st <span class="ot">&lt;-</span> <span class="fu">sih_status</span>()</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">nrow</span>(st)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; [1] 11157</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">attr</span>(st, <span class="st">&quot;last_updated&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; [1] &quot;2026-08-18T12:33:31&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="fu">range</span>(st<span class="sc">$</span>year)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; [1] 1992 2026</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>st <span class="sc">|&gt;</span> <span class="fu">filter</span>(uf <span class="sc">==</span> <span class="st">&quot;RR&quot;</span>, year <span class="sc">==</span> <span class="dv">2023</span>, month <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="fu">select</span>(records, source_hash_md5, parquet_sha256, pipeline_version)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 4</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;   records source_hash_md5                  parquet_sha256                                                   pipeline_version</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt;     &lt;dbl&gt; &lt;chr&gt;                            &lt;chr&gt;                                                            &lt;chr&gt;</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; 1    4734 12e74d4b059589ceb47e4136e3b2ce5f bab1c2fdda7b09a6117169156f51846e095de0bc502fec9adecf90d2e1f08474 1.0.0</span></span></code></pre></div>
+<p>microdatasus 3.0.0 has <code>track_source = TRUE</code>, which
+appends a <code>source</code> column with the name of the
+<code>.dbc</code> each row came from; it does not record hashes or
+timestamps, and the FTP does not offer them. If your derived product
+needs to say exactly which files it was built from, this is the
+difference that matters.</p>
+</div>
+<div id="lazy-evaluation-a-year-without-downloading-it" class="section level2">
+<h2>Lazy evaluation: a year without downloading it</h2>
+<p>healthbR’s <code>lazy = TRUE</code> returns an arrow (or duckdb)
+dataset over the mirror; filters and column selections are pushed down
+and only the matching bytes travel. Deaths per competence in Roraima for
+all of 2023, nothing cached:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">uf =</span> <span class="st">&quot;RR&quot;</span>, <span class="at">lazy =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="fu">filter</span>(MORTE <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">count</span>(month) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="fu">collect</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="fu">arrange</span>(month)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; # A tibble: 12 × 2</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt;    month     n</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt;    &lt;int&gt; &lt;int&gt;</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt;  1     1   113</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt;  2     2   120</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;  3     3   175</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt;  4     4   166</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt;  5     5   118</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt;  6     6    78</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt;  7     7    97</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt;  8     8   144</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt;  9     9   105</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; 10    10   104</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; 11    11   128</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt; 12    12   102</span></span></code></pre></div>
+<p>19.4 s for twelve competences, no local copy left behind. With
+microdatasus the equivalent is
+<code>fetch_datasus(2023, 1, 2023, 12, uf = &quot;RR&quot;, information_system = &quot;SIH-RD&quot;)</code>:
+twelve <code>.dbc</code> downloads, all rows in memory, then
+<code>filter()</code>. For one small state that is fine; for the whole
+country (a year of SIH is about 2 GB of <code>.dbc</code>) the
+difference decides whether the query is feasible on a laptop.</p>
+</div>
+<div id="sim-mortality-acre-2022" class="section level2">
+<h2>SIM: mortality, Acre 2022</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># healthbR</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>ac_h <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; ℹ Downloading SIM data: AC 2022...</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">dim</span>(ac_h)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; [1] 4159   90</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co"># microdatasus</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>ac_m  <span class="ot">&lt;-</span> <span class="fu">fetch_datasus</span>(<span class="at">year_start =</span> <span class="dv">2022</span>, <span class="at">year_end =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>                       <span class="at">information_system =</span> <span class="st">&quot;SIM-DO&quot;</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>ac_mp <span class="ot">&lt;-</span> <span class="fu">process_sim</span>(ac_m)</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="fu">dim</span>(ac_m); <span class="fu">dim</span>(ac_mp)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; [1] 4159   87</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; [1] 4159  100</span></span></code></pre></div>
+<p>Same 4,159 deaths (1.5 s healthbR, 2.1 s + 0.7 s microdatasus). The
+interesting column is age. SIM stores it as three characters: the first
+is the unit (0 minutes, 1 hours, 2 days, 3 months, 4 years, 5 years over
+100) and the last two the value. The two packages decode it
+differently:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">sim_dictionary</span>(<span class="st">&quot;IDADE&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 6 × 4</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt;   variable description                 code  label</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;                       &lt;chr&gt; &lt;chr&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; 1 IDADE    Idade (1º dígito = unidade) 0     Minutos (&lt; 1 hora)</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; 2 IDADE    Idade (1º dígito = unidade) 1     Horas</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; 3 IDADE    Idade (1º dígito = unidade) 2     Dias</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; 4 IDADE    Idade (1º dígito = unidade) 3     Meses</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 5 IDADE    Idade (1º dígito = unidade) 4     Anos (0-99)</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; 6 IDADE    Idade (1º dígito = unidade) 5     Anos (100+)</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co"># six infant deaths, the same rows in both</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt;   IDADE healthbR_age_years md_IDADEanos md_IDADEmeses md_IDADEdias md_IDADEhoras</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; 1   021       3.992699e-05         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;          &lt;NA&gt;</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; 2   101       1.140771e-04         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;             1</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; 3   201       2.737851e-03         &lt;NA&gt;          &lt;NA&gt;            1          &lt;NA&gt;</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; 4   302       1.666667e-01         &lt;NA&gt;             2         &lt;NA&gt;          &lt;NA&gt;</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; 5   102       2.281542e-04         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;             2</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; 6   108       9.126169e-04         &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;             8</span></span></code></pre></div>
+<p>healthbR (<code>decode_age = TRUE</code>, the default) adds one
+numeric <code>age_years</code> that is continuous – 21 minutes is
+0.00004 years, 2 months is 0.167 – so age bands and rates come out of
+one column; <code>IDADE</code> itself is kept. microdatasus splits the
+field into <code>IDADEminutos</code>, <code>IDADEhoras</code>,
+<code>IDADEdias</code>, <code>IDADEmeses</code>, <code>IDADEanos</code>,
+each <code>NA</code> outside its unit, which is closer to how the DO
+form reads and keeps the unit explicit. For adult mortality the two
+agree to the year; for infant mortality you will reach for different
+columns.</p>
+</div>
+<div id="sinasc-live-births-acre-2022" class="section level2">
+<h2>SINASC: live births, Acre 2022</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># healthbR</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>ac_n <span class="ot">&lt;-</span> <span class="fu">sinasc_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">dim</span>(ac_n)</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; [1] 14483    63</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="fu">class</span>(ac_n<span class="sc">$</span>PESO); <span class="fu">sum</span>(<span class="fu">is.na</span>(ac_n<span class="sc">$</span>PESO)); <span class="fu">median</span>(ac_n<span class="sc">$</span>PESO, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;integer&quot;</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; [1] 94</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; [1] 3230</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co"># microdatasus</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>ac_nm  <span class="ot">&lt;-</span> <span class="fu">fetch_datasus</span>(<span class="at">year_start =</span> <span class="dv">2022</span>, <span class="at">year_end =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>                        <span class="at">information_system =</span> <span class="st">&quot;SINASC&quot;</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>ac_nmp <span class="ot">&lt;-</span> <span class="fu">process_sinasc</span>(ac_nm)</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(ac_nm<span class="sc">$</span>PESO)); <span class="fu">sum</span>(<span class="fu">is.na</span>(ac_nmp<span class="sc">$</span>PESO))</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; [1] 94</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; [1] 14483</span></span></code></pre></div>
+<p>Same 14,483 births (3.1 s healthbR; 3.3 s + 3.5 s microdatasus). One
+thing to know before relying on <code>process_sinasc()</code> in the
+versions measured here: it returned <code>PESO</code> (birth weight) as
+<code>NA</code> on every row, while the raw column had 94 missing values
+out of 14,483. The behaviour reproduces offline with the package’s own
+sample:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(microdatasus<span class="sc">::</span>sinasc_sample<span class="sc">$</span>PESO))</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt; [1] 2</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(<span class="fu">process_sinasc</span>(microdatasus<span class="sc">::</span>sinasc_sample)<span class="sc">$</span>PESO))</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; [1] 100</span></span></code></pre></div>
+<p>The recode of the sentinel values (<code>&quot;0&quot;</code> and
+<code>&quot;9999&quot;</code> to <code>NA</code>) is followed by an
+<code>as.numeric()</code>, and with dplyr 1.2.1 the whole column comes
+back missing. It is the kind of thing a maintainer fixes in an afternoon
+once reported; check the package’s news and issue tracker for your
+versions, and in the meantime take <code>PESO</code> from the raw
+tibble. healthbR does not rewrite the column: <code>PESO</code> is
+parsed to integer and the sentinels are left for you to treat.</p>
+</div>
+<div id="where-the-bytes-come-from" class="section level2">
+<h2>Where the bytes come from</h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>healthbR</th>
+<th>microdatasus</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>SIM, SINASC, SIA, SINAN, CNES</td>
+<td>DATASUS FTP, <code>.dbc</code>, decompressed locally</td>
+<td>DATASUS FTP, <code>.dbc</code>, decompressed locally</td>
+</tr>
+<tr class="even">
+<td>SIH, SI-PNI</td>
+<td><a href="https://github.com/SidneyBissoli/healthbr-data">healthbr-data</a>
+mirror: hive-partitioned Parquet on Cloudflare R2, one partition per
+DATASUS file, byte-identical values, provenance per file; DATASUS FTP as
+fallback (<code>source = c(&quot;r2&quot;, &quot;datasus&quot;)</code>)</td>
+<td>DATASUS FTP</td>
+</tr>
+<tr class="odd">
+<td>Local cache</td>
+<td>Partitioned Parquet per module (<code>*_cache_status()</code>,
+<code>*_clear_cache()</code>); a second call never touches the
+network</td>
+<td>none (every call downloads)</td>
+</tr>
+<tr class="even">
+<td>Re-issued files</td>
+<td><code>sih_status()</code>: MD5 and size per partition,
+<code>last_updated</code> of the mirror</td>
+<td>–</td>
+</tr>
+<tr class="odd">
+<td>Lazy queries</td>
+<td><code>lazy = TRUE</code>, <code>backend = &quot;arrow&quot;</code> or
+<code>&quot;duckdb&quot;</code>, over the cache or the mirror</td>
+<td>–</td>
+</tr>
+<tr class="even">
+<td>Parallel downloads</td>
+<td><code>future::plan(multisession)</code> + furrr</td>
+<td>sequential</td>
+</tr>
+</tbody>
+</table>
+<p>The mirror is refreshed weekly against the FTP by file size (the FTP
+offers neither ETag nor hash), and a re-issued file is republished with
+a new MD5 in the manifest – that is what <code>sih_status()</code>
+reads.</p>
+</div>
+<div id="other-routes" class="section level2">
+<h2>Other routes</h2>
+<p>Two other projects answer the same question and were not measured
+here: <a href="https://github.com/AlertaDengue/PySUS">PySUS</a>, the
+Python package that covers SIM, SINASC, SIH, SIA, CNES and SINAN from
+the same FTP, and <a href="https://basedosdados.org">basedosdados</a>,
+which serves treated SIM and SINASC tables through BigQuery with an R
+client. If your pipeline is in Python, PySUS is the natural pick; if you
+want SQL over already-treated tables and accept the BigQuery account,
+basedosdados.</p>
+</div>
+<div id="which-one" class="section level2">
+<h2>Which one</h2>
+<ul>
+<li><strong>You want labels in the tibble and a quick table</strong>:
+microdatasus. <code>process_*()</code> does in one call what would take
+a few joins in healthbR, and it also brings municipality names and
+coordinates.</li>
+<li><strong>You join, compare years, or model</strong>: healthbR. Codes
+stay codes, types are already parsed, dictionaries are functions, and
+nothing is rewritten under you.</li>
+<li><strong>You read SIH at scale, or repeatedly</strong>: healthbR.
+Local Parquet cache, lazy arrow/duckdb queries over the mirror,
+provenance you can cite.</li>
+<li><strong>You need the SIM fetal/infant/maternal extracts, the
+RJ/SP/ER SIH files, or SIGTAP</strong>: microdatasus, which has them and
+healthbR does not (yet).</li>
+<li><strong>You need SI-PNI, SISAB, the household surveys, ANS or
+ANVISA</strong>: healthbR; microdatasus stops at DATASUS.</li>
+</ul>
+<p>They also compose. <code>fetch_datasus()</code> and
+<code>sih_data(parse = FALSE)</code> return the same character columns
+for the same file, so a script can read with one and label with the
+other:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># read with healthbR (cache, provenance), label with microdatasus</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;RR&quot;</span>, <span class="at">parse =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="fu">process_sih</span>()</span></code></pre></div>
+</div>
+<div id="reproducing-this-vignette" class="section level2">
+<h2>Reproducing this vignette</h2>
+<p>The three downloads are small (the SIH file is 349 KB). To rerun the
+comparison from a fresh cache:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">&quot;microdatasus&quot;</span>, <span class="st">&quot;arrow&quot;</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co"># install.packages(&quot;pak&quot;); pak::pak(&quot;SidneyBissoli/healthbR&quot;)   # dev version</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="fu">sih_clear_cache</span>(); <span class="fu">sim_clear_cache</span>(); <span class="fu">sinasc_clear_cache</span>()</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="fu">system.time</span>(<span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;RR&quot;</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="fu">system.time</span>(<span class="fu">fetch_datasus</span>(<span class="dv">2023</span>, <span class="dv">1</span>, <span class="dv">2023</span>, <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;RR&quot;</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>                          <span class="at">information_system =</span> <span class="st">&quot;SIH-RD&quot;</span>))</span></code></pre></div>
+<p>Related: <a href="sih-hospital-admissions.html">SIH – Hospital
+admissions</a>, <a href="sim-mortality.html">SIM – Mortality</a>, <a href="sinasc-live-births.html">SINASC – Live births</a>, <a href="datasus-modules.html">DATASUS modules overview</a>.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

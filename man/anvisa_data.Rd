@@ -77,6 +77,13 @@ from January 2026. Cached as Hive-style partitioned parquet datasets.
 
 The three VigiMed types share the \code{IDENTIFICACAO_NOTIFICACAO} key
 for linking notifications, medicines, and reactions.
+\subsection{Parallel downloads}{
+
+When downloading multiple SNGPC months, install \pkg{furrr} and \pkg{future}
+and set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
@@ -94,11 +101,11 @@ sngpc <- anvisa_data(type = "sngpc", year = 2020, month = 1)
 \code{\link{anvisa_types}()} for available types,
 \code{\link{anvisa_variables}()} for variable descriptions.
 
-Other anvisa: 
-\code{\link{anvisa_cache_status}()},
-\code{\link{anvisa_clear_cache}()},
-\code{\link{anvisa_info}()},
-\code{\link{anvisa_types}()},
-\code{\link{anvisa_variables}()}
+Other anvisa:
+\code{\link[=anvisa_cache_status]{anvisa_cache_status()}},
+\code{\link[=anvisa_clear_cache]{anvisa_clear_cache()}},
+\code{\link[=anvisa_info]{anvisa_info()}},
+\code{\link[=anvisa_types]{anvisa_types()}},
+\code{\link[=anvisa_variables]{anvisa_variables()}}
 }
 \concept{anvisa}

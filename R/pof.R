@@ -228,24 +228,27 @@ pof_cache_dir <- function(cache_dir = NULL) {
   zip_file
 }
 
-#' Find dictionary file in extracted documentation
+#' Find dictionary file by direct grep pattern matching
+#' @param xls_files Character vector of .xls file paths.
+#' @param patterns Character vector of patterns to try.
+#' @return Matched file path or NULL.
 #' @noRd
-.pof_find_dictionary_file <- function(extracted_files, year) {
-  # look for dictionary Excel file
-  # use flexible patterns to handle encoding issues with Portuguese characters
-  xls_files <- extracted_files[grepl("\\.xls", extracted_files, ignore.case = TRUE, useBytes = TRUE)]
-
-  # approach 1: direct pattern matching
-  dict_patterns <- c("dicion", "variav", "variaveis")
-  for (pattern in dict_patterns) {
+.pof_match_xls_by_pattern <- function(xls_files, patterns) {
+  for (pattern in patterns) {
     for (f in xls_files) {
       if (grepl(pattern, f, ignore.case = TRUE, useBytes = TRUE)) {
         return(f)
       }
     }
   }
+  NULL
+}
 
-  # approach 2: check raw bytes for "Dicion" (handles encoding issues)
+#' Find dictionary file by raw byte comparison for "Dicion"
+#' @param xls_files Character vector of .xls file paths.
+#' @return Matched file path or NULL.
+#' @noRd
+.pof_match_xls_by_bytes <- function(xls_files) {
   dicion_raw <- charToRaw("Dicion")
   for (f in xls_files) {
     bn <- basename(f)
@@ -256,15 +259,99 @@ pof_cache_dir <- function(cache_dir = NULL) {
       }
     }
   }
+  NULL
+}
 
-  # approach 3: look for files with "variav" in accent-stripped name
+#' Find dictionary file by accent-stripped name matching
+#' @param xls_files Character vector of .xls file paths.
+#' @return Matched file path or NULL.
+#' @noRd
+.pof_match_xls_by_stripped <- function(xls_files) {
   for (f in xls_files) {
     bn_ascii <- .strip_accents(basename(f))
     if (grepl("dicion|variav", bn_ascii, ignore.case = TRUE, useBytes = TRUE)) {
       return(f)
     }
   }
+  NULL
+}
 
+#' Find dictionary file in extracted documentation
+#' @noRd
+.pof_find_dictionary_file <- function(extracted_files, year) {
+  # look for dictionary Excel file
+  # use flexible patterns to handle encoding issues with Portuguese characters
+  xls_files <- extracted_files[grepl("\\.xls", extracted_files, ignore.case = TRUE, useBytes = TRUE)]
+
+  # approach 1: direct pattern matching
+  result <- .pof_match_xls_by_pattern(xls_files, c("dicion", "variav", "variaveis"))
+  if (!is.null(result)) return(result)
+
+  # approach 2: check raw bytes for "Dicion" (handles encoding issues)
+  result <- .pof_match_xls_by_bytes(xls_files)
+  if (!is.null(result)) return(result)
+
+  # approach 3: look for files with "dicion" or "variav" in accent-stripped name
+  .pof_match_xls_by_stripped(xls_files)
+}
+
+#' Standardize dictionary column names to canonical format
+#'
+#' Renames columns from the raw Excel dictionary to standard names:
+#' position, length, variable, description, decimals, categories.
+#' @param df Data frame with raw column names from readxl.
+#' @return The same data frame with standardized column names.
+#' @noRd
+.pof_standardize_dict_columns <- function(df) {
+  col_names <- names(df)
+
+  # mapping: standard_name -> grep pattern
+  rename_map <- list(
+    position    = "posicao|inicio|start|pos",
+    length      = "tamanho|length|tam|size",
+    variable    = "codigo|variavel|variable|var|nome",
+    description = "descricao|description|desc|rotulo|label",
+    decimals    = "decimais|decimal|dec",
+    categories  = "categor|categ"
+  )
+
+  for (std_name in names(rename_map)) {
+    matched <- col_names[grepl(rename_map[[std_name]], col_names, ignore.case = TRUE)]
+    if (length(matched) > 0) {
+      names(df)[names(df) == matched[1]] <- std_name
+    }
+  }
+
+  df
+}
+
+#' Map an accent-stripped sheet name to a standard register name
+#'
+#' Uses a fixed register_map with more-specific patterns first to avoid
+#' partial matches (e.g. "outros rendimentos" before "rendimento").
+#' @param sheet_ascii Lowercase, accent-stripped sheet name.
+#' @return Matched register name (character) or NULL.
+#' @noRd
+.pof_match_register_name <- function(sheet_ascii) {
+  register_map <- list(
+    "outros rendimentos" = "outros_rendimentos",
+    "rendimento" = "rendimento",
+    "consumo alimentar" = "consumo_alimentar",
+    "consumo" = "consumo_alimentar",
+    "despesa individual" = "despesa_individual",
+    "despesa coletiva" = "despesa_coletiva",
+    "aluguel estimado" = "aluguel_estimado",
+    "caderneta" = "caderneta_coletiva",
+    "inventario" = "inventario",
+    "domicilio" = "domicilio",
+    "morador" = "morador"
+  )
+
+  for (pattern in names(register_map)) {
+    if (grepl(pattern, sheet_ascii, ignore.case = TRUE)) {
+      return(register_map[[pattern]])
+    }
+  }
   NULL
 }
 
@@ -323,69 +410,10 @@ pof_cache_dir <- function(cache_dir = NULL) {
         df <- df |> dplyr::filter(!dplyr::if_all(dplyr::everything(), is.na))
 
         # standardize column names to expected format
-        col_names <- names(df)
-
-        # position column
-        pos_col <- col_names[grepl("posicao|inicio|start|pos", col_names, ignore.case = TRUE)]
-        if (length(pos_col) > 0) {
-          names(df)[names(df) == pos_col[1]] <- "position"
-        }
-
-        # length column
-        len_col <- col_names[grepl("tamanho|length|tam|size", col_names, ignore.case = TRUE)]
-        if (length(len_col) > 0) {
-          names(df)[names(df) == len_col[1]] <- "length"
-        }
-
-        # variable column
-        var_col <- col_names[grepl("codigo|variavel|variable|var|nome", col_names, ignore.case = TRUE)]
-        if (length(var_col) > 0) {
-          names(df)[names(df) == var_col[1]] <- "variable"
-        }
-
-        # description column
-        desc_col <- col_names[grepl("descricao|description|desc|rotulo|label", col_names, ignore.case = TRUE)]
-        if (length(desc_col) > 0) {
-          names(df)[names(df) == desc_col[1]] <- "description"
-        }
-
-        # decimals column
-        dec_col <- col_names[grepl("decimais|decimal|dec", col_names, ignore.case = TRUE)]
-        if (length(dec_col) > 0) {
-          names(df)[names(df) == dec_col[1]] <- "decimals"
-        }
-
-        # categories column
-        cat_col <- col_names[grepl("categor|categ", col_names, ignore.case = TRUE)]
-        if (length(cat_col) > 0) {
-          names(df)[names(df) == cat_col[1]] <- "categories"
-        }
+        df <- .pof_standardize_dict_columns(df)
 
         # map sheet name to standard register name
-        # sheet_ascii already computed above (accent-stripped, lowercase)
-
-        # more specific patterns first to avoid partial matches
-        register_map <- list(
-          "outros rendimentos" = "outros_rendimentos",
-          "rendimento" = "rendimento",
-          "consumo alimentar" = "consumo_alimentar",
-          "consumo" = "consumo_alimentar",
-          "despesa individual" = "despesa_individual",
-          "despesa coletiva" = "despesa_coletiva",
-          "aluguel estimado" = "aluguel_estimado",
-          "caderneta" = "caderneta_coletiva",
-          "inventario" = "inventario",
-          "domicilio" = "domicilio",
-          "morador" = "morador"
-        )
-
-        matched_register <- NULL
-        for (pattern in names(register_map)) {
-          if (grepl(pattern, sheet_ascii, ignore.case = TRUE)) {
-            matched_register <- register_map[[pattern]]
-            break
-          }
-        }
+        matched_register <- .pof_match_register_name(sheet_ascii)
 
         # skip sheets that don't match any known register
         if (is.null(matched_register)) {
@@ -695,6 +723,21 @@ pof_cache_dir <- function(cache_dir = NULL) {
   pos_strat
 }
 
+#' Find a design variable in data by matching column name patterns
+#' @param data Data frame.
+#' @param patterns Character vector of candidate column names (uppercase).
+#' @return The original column name (preserving case) or NULL if not found.
+#' @noRd
+.pof_find_design_var <- function(data, patterns) {
+  col_names <- toupper(names(data))
+  for (pattern in patterns) {
+    if (pattern %in% col_names) {
+      return(names(data)[col_names == pattern])
+    }
+  }
+  NULL
+}
+
 #' Create survey design object with post-stratification
 #' @noRd
 .pof_create_survey_design <- function(data, year, cache_dir) {
@@ -708,37 +751,9 @@ pof_cache_dir <- function(cache_dir = NULL) {
 
   # identify design variables in data
   # POF uses different variable names across years
-  col_names <- toupper(names(data))
-
-  # find weight variable
-  weight_patterns <- c("PESO_FINAL", "PESO", "FATOR_ANUALIZACAO", "V9001")
-  weight_var <- NULL
-  for (pattern in weight_patterns) {
-    if (pattern %in% col_names) {
-      weight_var <- names(data)[toupper(names(data)) == pattern]
-      break
-    }
-  }
-
-  # find stratum variable
-  strata_patterns <- c("ESTRATO_POF", "ESTRATO", "V0024")
-  strata_var <- NULL
-  for (pattern in strata_patterns) {
-    if (pattern %in% col_names) {
-      strata_var <- names(data)[toupper(names(data)) == pattern]
-      break
-    }
-  }
-
-  # find PSU variable
-  psu_patterns <- c("COD_UPA", "UPA", "V0001")
-  psu_var <- NULL
-  for (pattern in psu_patterns) {
-    if (pattern %in% col_names) {
-      psu_var <- names(data)[toupper(names(data)) == pattern]
-      break
-    }
-  }
+  weight_var <- .pof_find_design_var(data, c("PESO_FINAL", "PESO", "FATOR_ANUALIZACAO", "V9001"))
+  strata_var <- .pof_find_design_var(data, c("ESTRATO_POF", "ESTRATO", "V0024"))
+  psu_var    <- .pof_find_design_var(data, c("COD_UPA", "UPA", "V0001"))
 
   # check if required variables are found
   if (is.null(weight_var) || is.null(strata_var) || is.null(psu_var)) {
@@ -1123,6 +1138,73 @@ pof_variables <- function(year = "2017-2018",
 # public api functions - data
 # ============================================================================
 
+# --------------------------------------------------------------------------
+# internal helpers for pof_data() (extracted to reduce cyclomatic complexity)
+# --------------------------------------------------------------------------
+
+#' Try lazy return for POF data
+#' @noRd
+.pof_try_lazy_return <- function(lazy, backend, register, vars, year,
+                                 cache_dir) {
+  if (!isTRUE(lazy)) return(NULL)
+  backend <- match.arg(backend, c("arrow", "duckdb"))
+  cache_dir_resolved <- .module_cache_dir("pof", cache_dir)
+  ds_name <- stringr::str_c("pof_", register, "_data")
+  select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
+  .lazy_return(cache_dir_resolved, ds_name, backend,
+               filters = list(year = year),
+               select_cols = select_cols)
+}
+
+#' Check partitioned cache for POF data
+#' @noRd
+.pof_check_cache <- function(cache_dir, dataset_name, year, register,
+                             refresh) {
+  if (refresh || !.has_arrow() ||
+      !.has_partitioned_cache(cache_dir, dataset_name)) {
+    return(NULL)
+  }
+  ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
+  cached <- ds |>
+    dplyr::filter(.data$year == !!year) |>
+    dplyr::collect()
+  if (nrow(cached) == 0) return(NULL)
+  cli::cli_inform("Loading {register} data from cache...")
+  cached
+}
+
+#' Download, read, and cache a POF register
+#' @noRd
+.pof_download_register <- function(year, register, cache_dir, dataset_name) {
+  cli::cli_inform("Downloading POF {year} {register} data...")
+  zip_path <- .pof_download_data(year, cache_dir)
+  dict <- pof_dictionary(year, register, cache_dir)
+  df <- .pof_read_fwf(zip_path, register, dict, year)
+  df <- df |> dplyr::mutate(year = year, .before = 1)
+  .cache_append_partitioned(df, cache_dir, dataset_name, c("year"))
+  df
+}
+
+#' Select variables from POF data (case-insensitive, always keeps design vars)
+#' @noRd
+.pof_select_vars <- function(df, vars) {
+  if (is.null(vars)) return(df)
+  design_vars <- c("COD_UPA", "ESTRATO_POF", "PESO_FINAL", "UF")
+  all_vars <- unique(c(design_vars, toupper(vars)))
+  year_col <- if ("year" %in% names(df)) "year" else NULL
+
+  col_names_upper <- toupper(names(df))
+  available_vars <- names(df)[col_names_upper %in% all_vars]
+
+  missing <- setdiff(all_vars, col_names_upper)
+  if (length(missing) > 0) {
+    cli::cli_warn("Variables not found: {.val {missing}}")
+  }
+
+  available_vars <- unique(c(year_col, available_vars))
+  df |> dplyr::select(dplyr::all_of(available_vars))
+}
+
 #' Download and import POF microdata
 #'
 #' Downloads POF microdata from IBGE FTP and returns as a tibble.
@@ -1216,106 +1298,42 @@ pof_data <- function(year = "2017-2018",
   .pof_validate_register(register, year)
 
   # 2. check if srvyr is available when as_survey = TRUE
-  if (as_survey) {
-    if (!requireNamespace("srvyr", quietly = TRUE)) {
-      cli::cli_abort(c(
-        "Package {.pkg srvyr} is required for survey analysis.",
-        "i" = "Install with: {.code install.packages('srvyr')}"
-      ))
-    }
+  if (as_survey && !requireNamespace("srvyr", quietly = TRUE)) {
+    cli::cli_abort(c(
+      "Package {.pkg srvyr} is required for survey analysis.",
+      "i" = "Install with: {.code install.packages('srvyr')}"
+    ))
   }
 
-  # 3. set cache directory
+  # 3. set cache directory and dataset name
   cache_dir <- pof_cache_dir(cache_dir)
   dataset_name <- stringr::str_c("pof_", register, "_data")
-  df <- NULL
 
-  # lazy evaluation: return from partitioned cache if available
-  if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .module_cache_dir("pof", cache_dir)
-    ds_name <- stringr::str_c("pof_", register, "_data")
-    select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
-                       filters = list(year = year),
-                       select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-  }
+  # 4. pre-download lazy return (if cache already exists)
+  ds <- .pof_try_lazy_return(lazy, backend, register, vars, year, cache_dir)
+  if (!is.null(ds)) return(ds)
 
-  # 4. check partitioned cache first (preferred path)
-  if (!refresh && .has_arrow() &&
-      .has_partitioned_cache(cache_dir, dataset_name)) {
-    ds <- arrow::open_dataset(file.path(cache_dir, dataset_name))
-    cached <- ds |>
-      dplyr::filter(.data$year == !!year) |>
-      dplyr::collect()
-    if (nrow(cached) > 0) {
-      cli::cli_inform("Loading {register} data from cache...")
-      df <- cached
-    }
-  }
+  # 5. check partitioned cache
+  df <- .pof_check_cache(cache_dir, dataset_name, year, register, refresh)
 
-  # 5. download data if not cached
+  # 6. download if not cached
   if (is.null(df)) {
-    cli::cli_inform("Downloading POF {year} {register} data...")
-
-    # download zip file
-    zip_path <- .pof_download_data(year, cache_dir)
-
-    # get dictionary for this register
-    dict <- pof_dictionary(year, register, cache_dir)
-
-    # read fixed-width file
-    df <- .pof_read_fwf(zip_path, register, dict, year)
-
-    # add year column
-    df <- df |>
-      dplyr::mutate(year = year, .before = 1)
-
-    # write to partitioned cache
-    .cache_append_partitioned(df, cache_dir, dataset_name, c("year"))
+    df <- .pof_download_register(year, register, cache_dir, dataset_name)
   }
 
-  # if lazy was requested, return from cache after download
-  if (isTRUE(lazy)) {
-    backend <- match.arg(backend)
-    cache_dir_resolved <- .module_cache_dir("pof", cache_dir)
-    ds_name <- stringr::str_c("pof_", register, "_data")
-    select_cols <- if (!is.null(vars)) unique(c("year", vars)) else NULL
-    ds <- .lazy_return(cache_dir_resolved, ds_name, backend,
-                       filters = list(year = year),
-                       select_cols = select_cols)
-    if (!is.null(ds)) return(ds)
-  }
+  # 7. post-download lazy return
+  ds <- .pof_try_lazy_return(lazy, backend, register, vars, year, cache_dir)
+  if (!is.null(ds)) return(ds)
 
-  # 7. select specific variables if requested
-  if (!is.null(vars)) {
-    # always include design variables and year
-    design_vars <- c("COD_UPA", "ESTRATO_POF", "PESO_FINAL", "UF")
-    all_vars <- unique(c(design_vars, toupper(vars)))
-    # also include year column if present (lowercase)
-    year_col <- if ("year" %in% names(df)) "year" else NULL
+  # 8. select variables
+  df <- .pof_select_vars(df, vars)
 
-    # find matching columns (case-insensitive)
-    col_names_upper <- toupper(names(df))
-    available_vars <- names(df)[col_names_upper %in% all_vars]
-
-    missing <- setdiff(all_vars, col_names_upper)
-    if (length(missing) > 0) {
-      cli::cli_warn("Variables not found: {.val {missing}}")
-    }
-
-    available_vars <- unique(c(year_col, available_vars))
-    df <- df |>
-      dplyr::select(dplyr::all_of(available_vars))
-  }
-
-  # 8. report
+  # 9. report
   cli::cli_alert_success(
     "Loaded {.val {nrow(df)}} observations from POF {year} {register}"
   )
 
-  # 9. apply survey design if requested
+  # 10. apply survey design if requested
   if (as_survey) {
     df <- .pof_create_survey_design(df, year, cache_dir)
   }

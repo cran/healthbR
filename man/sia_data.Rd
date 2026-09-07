@@ -96,6 +96,13 @@ to limit downloads.
 
 The SIA has 13 file types. The default \code{"PA"} (outpatient production)
 is the most commonly used. Use \code{\link{sia_info}()} to see all types.
+\subsection{Parallel downloads}{
+
+When downloading multiple files (e.g., several months or states), install
+\pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
@@ -123,12 +130,12 @@ med <- sia_data(year = 2022, month = 1, uf = "AC", type = "AM")
 \code{\link{sia_info}()} for file type descriptions,
 \code{\link{censo_populacao}()} for population denominators.
 
-Other sia: 
-\code{\link{sia_cache_status}()},
-\code{\link{sia_clear_cache}()},
-\code{\link{sia_dictionary}()},
-\code{\link{sia_info}()},
-\code{\link{sia_variables}()},
-\code{\link{sia_years}()}
+Other sia:
+\code{\link[=sia_cache_status]{sia_cache_status()}},
+\code{\link[=sia_clear_cache]{sia_clear_cache()}},
+\code{\link[=sia_dictionary]{sia_dictionary()}},
+\code{\link[=sia_info]{sia_info()}},
+\code{\link[=sia_variables]{sia_variables()}},
+\code{\link[=sia_years]{sia_years()}}
 }
 \concept{sia}

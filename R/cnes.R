@@ -374,6 +374,12 @@ cnes_dictionary <- function(variable = NULL) {
 #' The CNES has 13 file types. The default \code{"ST"} (establishments) is
 #' the most commonly used. Use \code{\link{cnes_info}()} to see all types.
 #'
+#' ## Parallel downloads
+#' When downloading multiple files (e.g., several months or states), install
+#' \pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @export
 #' @family cnes
 #'
@@ -436,7 +442,8 @@ cnes_data <- function(year, type = "ST", month = NULL, vars = NULL, uf = NULL,
   labels <- paste(type, combinations$uf,
                   paste0(combinations$year, "/", sprintf("%02d", combinations$month)))
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
+                            .progress = "Downloading", function(i) {
     yr <- combinations$year[i]
     mo <- combinations$month[i]
     st <- combinations$uf[i]

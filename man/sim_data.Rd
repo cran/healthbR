@@ -82,6 +82,13 @@ blast library. No external dependencies are required.
 
 When \code{uf} is specified, only the requested state(s) are downloaded,
 making the operation much faster than downloading the entire country.
+\subsection{Parallel downloads}{
+
+When downloading multiple files (e.g., several years or states), install
+\pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
@@ -101,12 +108,12 @@ sim_data(year = 2022, uf = "RJ",
 \code{\link[=censo_populacao]{censo_populacao()}} for population denominators to calculate
 mortality rates.
 
-Other sim: 
-\code{\link{sim_cache_status}()},
-\code{\link{sim_clear_cache}()},
-\code{\link{sim_dictionary}()},
-\code{\link{sim_info}()},
-\code{\link{sim_variables}()},
-\code{\link{sim_years}()}
+Other sim:
+\code{\link[=sim_cache_status]{sim_cache_status()}},
+\code{\link[=sim_clear_cache]{sim_clear_cache()}},
+\code{\link[=sim_dictionary]{sim_dictionary()}},
+\code{\link[=sim_info]{sim_info()}},
+\code{\link[=sim_variables]{sim_variables()}},
+\code{\link[=sim_years]{sim_years()}}
 }
 \concept{sim}

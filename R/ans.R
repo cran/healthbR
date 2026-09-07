@@ -422,7 +422,8 @@
                   paste0(combinations$year, "/",
                          sprintf("%02d", combinations$month)))
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
+                            .progress = "Downloading", function(i) {
     tryCatch({
       .ans_download_beneficiaries(
         combinations$year[i], combinations$month[i], combinations$uf[i],
@@ -471,7 +472,8 @@
 
   labels <- as.character(year)
 
-  results <- .map_parallel(seq_along(year), .delay = 0.5, function(i) {
+  results <- .map_parallel(seq_along(year), .delay = 0.5,
+                            .progress = "Downloading", function(i) {
     tryCatch({
       .ans_download_complaints(year[i], cache = cache, cache_dir = cache_dir)
     }, error = function(e) NULL)
@@ -528,7 +530,8 @@
 
   labels <- paste0(combinations$year, " Q", combinations$quarter)
 
-  results <- .map_parallel(seq_len(n_combos), .delay = 0.5, function(i) {
+  results <- .map_parallel(seq_len(n_combos), .delay = 0.5,
+                            .progress = "Downloading", function(i) {
     tryCatch({
       .ans_download_financial(
         combinations$year[i], combinations$quarter[i],
@@ -736,6 +739,12 @@ ans_variables <- function(type = "beneficiaries", search = NULL) {
 #' \strong{Financial}: Quarterly ZIP files with financial statements of
 #' health plan operators (balance sheets, income statements).
 #' Available from 2007.
+#'
+#' ## Parallel downloads
+#' When downloading multiple files (e.g., several months or quarters), install
+#' \pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
 #'
 #' @export
 #' @family ans

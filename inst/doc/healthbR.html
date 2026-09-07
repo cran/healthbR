@@ -347,8 +347,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 directly from R. The package downloads, caches, and processes data from
 official sources (Ministry of Health, IBGE, DATASUS), returning clean,
 analysis-ready tibbles following tidyverse conventions.</p>
-<p>The package currently supports <strong>13 data sources</strong>
-organized in two groups:</p>
+<p>The package currently supports <strong>16 data sources</strong>
+organized in three groups:</p>
 <p><strong>Surveys (IBGE / Ministry of Health)</strong></p>
 <table>
 <colgroup>
@@ -458,6 +458,37 @@ organized in two groups:</p>
 </tr>
 </tbody>
 </table>
+<p><strong>Regulatory agencies</strong></p>
+<table>
+<colgroup>
+<col width="22%" />
+<col width="22%" />
+<col width="36%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Source</th>
+<th>Granularity</th>
+<th>Years</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ANS</td>
+<td>Supplementary health (beneficiaries, complaints, financial)</td>
+<td>Monthly/UF</td>
+<td>2007–present</td>
+</tr>
+<tr class="even">
+<td>ANVISA</td>
+<td>Medicines, devices, pharmacovigilance, SNGPC</td>
+<td>National</td>
+<td>2014–present</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="getting-started" class="section level2">
 <h2>Getting started</h2>
@@ -465,7 +496,7 @@ organized in two groups:</p>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
 <p>To see all available data sources at a glance:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">list_sources</span>()</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 13 x 5</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 16 x 5</span></span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt;    source  name                         description                    years       status</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;   &lt;chr&gt;                        &lt;chr&gt;                          &lt;chr&gt;       &lt;chr&gt;</span></span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt;  1 vigitel VIGITEL                      Telephone survey on chronic... 2006-2024   available</span></span>
@@ -730,50 +761,143 @@ no FTP download or .dbc decompression is needed.</p>
 <span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a><span class="fu">sisab_variables</span>()</span>
 <span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a><span class="fu">sisab_variables</span>(<span class="at">type =</span> <span class="st">&quot;sb&quot;</span>)</span></code></pre></div>
 </div>
+<div id="ans-supplementary-health" class="section level2">
+<h2>ANS – Supplementary health</h2>
+<p>ANS (Agencia Nacional de Saude Suplementar) provides open data on
+private health insurance in Brazil, including beneficiary counts,
+consumer complaints, and operator financial statements.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># module overview</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">ans_info</span>()</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="co"># beneficiaries by state, January 2024</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>benef <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">type =</span> <span class="st">&quot;beneficiaries&quot;</span>, <span class="at">year =</span> <span class="dv">2024</span>, <span class="at">month =</span> <span class="dv">1</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co"># consumer complaints, 2023</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>reclamacoes <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">type =</span> <span class="st">&quot;complaints&quot;</span>, <span class="at">year =</span> <span class="dv">2023</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="co"># operator financial data, 2024 Q1</span></span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a>financeiro <span class="ot">&lt;-</span> <span class="fu">ans_data</span>(<span class="at">type =</span> <span class="st">&quot;financial&quot;</span>, <span class="at">year =</span> <span class="dv">2024</span>, <span class="at">quarter =</span> <span class="dv">1</span>)</span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a><span class="co"># health plan operator registry</span></span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a>operadoras <span class="ot">&lt;-</span> <span class="fu">ans_operators</span>()</span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a><span class="co"># explore variables</span></span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a><span class="fu">ans_variables</span>(<span class="at">type =</span> <span class="st">&quot;beneficiaries&quot;</span>)</span></code></pre></div>
+<p>See <code>vignette(&quot;ans-supplementary-health&quot;)</code> for detailed
+examples.</p>
+</div>
+<div id="anvisa-medicines-and-pharmacovigilance" class="section level2">
+<h2>ANVISA – Medicines and pharmacovigilance</h2>
+<p>ANVISA (Agencia Nacional de Vigilancia Sanitaria) publishes open data
+on regulated products (medicines, medical devices, food, cosmetics) and
+pharmacovigilance reports (VigiMed). The SNGPC module provides
+controlled substance dispensing data.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># see all available data types</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">anvisa_types</span>()</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="co"># registered medicines</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>medicamentos <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;medicines&quot;</span>)</span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="co"># pharmacovigilance notifications (VigiMed)</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a>vigimed <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;vigimed_notifications&quot;</span>)</span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a></span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a><span class="co"># controlled substance dispensing (SNGPC), monthly time-series</span></span>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a>sngpc <span class="ot">&lt;-</span> <span class="fu">anvisa_data</span>(<span class="at">type =</span> <span class="st">&quot;sngpc&quot;</span>, <span class="at">year =</span> <span class="dv">2024</span>, <span class="at">month =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>)</span>
+<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a><span class="co"># explore variables</span></span>
+<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a><span class="fu">anvisa_variables</span>(<span class="at">type =</span> <span class="st">&quot;medicines&quot;</span>)</span></code></pre></div>
+<p>See <code>vignette(&quot;anvisa-regulatory-data&quot;)</code> for detailed
+examples.</p>
+</div>
 <div id="caching" class="section level2">
 <h2>Caching</h2>
 <p>All modules cache downloaded data automatically to avoid repeated
 downloads. Install <code>arrow</code> for optimized Parquet caching
 (recommended):</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;arrow&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;arrow&quot;</span>)</span></code></pre></div>
 <p>Cache management works the same across all modules:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># check what is cached</span></span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">sim_cache_status</span>()</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="fu">vigitel_cache_status</span>()</span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co"># clear a module&#39;s cache</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="fu">sim_clear_cache</span>()</span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a></span>
-<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="co"># use a custom cache directory (e.g., for temporary use)</span></span>
-<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">cache_dir =</span> <span class="fu">tempdir</span>())</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="co"># check what is cached</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="fu">sim_cache_status</span>()</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a><span class="fu">vigitel_cache_status</span>()</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a><span class="co"># clear a module&#39;s cache</span></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a><span class="fu">sim_clear_cache</span>()</span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a><span class="co"># use a custom cache directory (e.g., for temporary use)</span></span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a><span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>, <span class="at">cache_dir =</span> <span class="fu">tempdir</span>())</span></code></pre></div>
+</div>
+<div id="parallel-downloads" class="section level2">
+<h2>Parallel downloads</h2>
+<p>When downloading data for multiple years, months, or states, healthbR
+processes each file sequentially by default. You can enable parallel
+downloads by installing <code>furrr</code> and <code>future</code> and
+setting a parallel plan before calling any <code>*_data()</code>
+function:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">&quot;furrr&quot;</span>, <span class="st">&quot;future&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">library</span>(future)</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a><span class="co"># use multiple R sessions (e.g., 4 workers)</span></span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a><span class="fu">plan</span>(multisession, <span class="at">workers =</span> <span class="dv">4</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a><span class="co"># downloads now run in parallel across workers</span></span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">sih_data</span>(<span class="at">year =</span> <span class="dv">2020</span><span class="sc">:</span><span class="dv">2023</span>, <span class="at">month =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">uf =</span> <span class="st">&quot;SP&quot;</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a><span class="co"># return to sequential mode when done</span></span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a><span class="fu">plan</span>(sequential)</span></code></pre></div>
+<p>This works with every module that downloads multiple files, including
+SIM, SINASC, SIH, SIA, SINAN, CNES, SI-PNI, SISAB, ANS, ANVISA, PNS, and
+PNADC. No code changes are needed beyond setting the plan – healthbR
+detects the active <code>future</code> plan automatically.</p>
+<p>A few practical notes:</p>
+<ul>
+<li><strong>FTP sources</strong> (DATASUS modules) include a small delay
+between requests to avoid overwhelming the server. Parallel workers
+respect this delay independently, so 4 workers download roughly 4x
+faster.</li>
+<li><strong>SI-PNI CSV</strong> (2020+) uses an additional concurrent
+HTTP strategy (<code>curl::multi_download()</code>) that works without
+<code>furrr</code>, downloading multiple months simultaneously within a
+single R session.</li>
+<li>Choose the number of workers based on your connection and the
+server. 2–4 workers is usually a good balance between speed and
+politeness.</li>
+</ul>
 </div>
 <div id="combining-modules" class="section level2">
 <h2>Combining modules</h2>
 <p>healthbR’s real power comes from combining data across modules. For
 example, calculating mortality rates requires deaths (SIM) and
 population (Censo):</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a></span>
-<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="co"># deaths by state</span></span>
-<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>deaths <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>  <span class="fu">count</span>(<span class="at">name =</span> <span class="st">&quot;deaths&quot;</span>)</span>
-<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a></span>
-<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="co"># population by state</span></span>
-<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">censo_populacao</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">territorial_level =</span> <span class="st">&quot;state&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>  <span class="fu">filter</span>(nivel_territorial_codigo <span class="sc">==</span> <span class="st">&quot;12&quot;</span>)  <span class="co"># Acre</span></span>
-<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a></span>
-<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a><span class="co"># crude mortality rate</span></span>
-<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>deaths<span class="sc">$</span>deaths <span class="sc">/</span> pop<span class="sc">$</span>valor <span class="sc">*</span> <span class="dv">100000</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a><span class="co"># deaths by state</span></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a>deaths <span class="ot">&lt;-</span> <span class="fu">sim_data</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">uf =</span> <span class="st">&quot;AC&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a>  <span class="fu">count</span>(<span class="at">name =</span> <span class="st">&quot;deaths&quot;</span>)</span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a><span class="co"># population by state</span></span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">censo_populacao</span>(<span class="at">year =</span> <span class="dv">2022</span>, <span class="at">territorial_level =</span> <span class="st">&quot;state&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a>  <span class="fu">filter</span>(nivel_territorial_codigo <span class="sc">==</span> <span class="st">&quot;12&quot;</span>)  <span class="co"># Acre</span></span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a><span class="co"># crude mortality rate</span></span>
+<span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a>deaths<span class="sc">$</span>deaths <span class="sc">/</span> pop<span class="sc">$</span>valor <span class="sc">*</span> <span class="dv">100000</span></span></code></pre></div>
 </div>
 <div id="additional-resources" class="section level2">
 <h2>Additional resources</h2>
 <ul>
-<li><code>vignette(&quot;pof-health-data&quot;)</code> – Analyzing food security
-and nutrition from POF</li>
-<li><code>vignette(&quot;censo-denominadores&quot;)</code> – Population
-denominators for epidemiology</li>
 <li><code>vignette(&quot;datasus-modules&quot;)</code> – SIM, SINASC, SIH, SIA,
 SINAN, and CNES in depth</li>
+<li><code>vignette(&quot;censo-denominadores&quot;)</code> – Population
+denominators for epidemiology</li>
+<li><code>vignette(&quot;pof-health-data&quot;)</code> – Analyzing food security
+and nutrition from POF</li>
+<li><code>vignette(&quot;sipni-vaccination&quot;)</code> – SI-PNI vaccination data
+(FTP + API)</li>
+<li><code>vignette(&quot;sisab-primary-care&quot;)</code> – SISAB primary care
+coverage indicators</li>
+<li><code>vignette(&quot;ans-supplementary-health&quot;)</code> – ANS
+supplementary health data</li>
+<li><code>vignette(&quot;anvisa-regulatory-data&quot;)</code> – ANVISA medicines
+and pharmacovigilance</li>
 <li><a href="https://sidneybissoli.github.io/healthbR/">Package
 website</a></li>
 <li><a href="https://github.com/SidneyBissoli/healthbR">GitHub

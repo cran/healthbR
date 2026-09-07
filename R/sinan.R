@@ -400,6 +400,12 @@ sinan_dictionary <- function(variable = NULL) {
 #' decompressed internally using vendored C code from the blast library.
 #' No external dependencies are required.
 #'
+#' ## Parallel downloads
+#' When downloading multiple files (e.g., several years or diseases), install
+#' \pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+#' `future::plan(future::multisession, workers = 4)`. See
+#' `vignette("healthbR")` for details.
+#'
 #' @export
 #' @family sinan
 #'
@@ -444,7 +450,8 @@ sinan_data <- function(year, disease = "DENG", vars = NULL,
   # download and read each year
   labels <- paste(disease, year)
 
-  results <- .map_parallel(year, .delay = 0.5, function(yr) {
+  results <- .map_parallel(year, .delay = 0.5,
+                            .progress = "Downloading", function(yr) {
     tryCatch({
       .sinan_download_and_read(yr, disease, cache = cache,
                                cache_dir = cache_dir)

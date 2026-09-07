@@ -73,6 +73,13 @@ To filter by state, use the \code{SG_UF_NOT} (UF of notification) or
 Data is downloaded from DATASUS FTP as .dbc files. The .dbc format is
 decompressed internally using vendored C code from the blast library.
 No external dependencies are required.
+\subsection{Parallel downloads}{
+
+When downloading multiple files (e.g., several years or diseases), install
+\pkg{furrr} and \pkg{future} and set a parallel plan to speed up downloads:
+\code{future::plan(future::multisession, workers = 4)}. See
+\code{vignette("healthbR")} for details.
+}
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
@@ -89,13 +96,13 @@ sinan_data(year = 2022, disease = "DENG",
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-Other sinan: 
-\code{\link{sinan_cache_status}()},
-\code{\link{sinan_clear_cache}()},
-\code{\link{sinan_dictionary}()},
-\code{\link{sinan_diseases}()},
-\code{\link{sinan_info}()},
-\code{\link{sinan_variables}()},
-\code{\link{sinan_years}()}
+Other sinan:
+\code{\link[=sinan_cache_status]{sinan_cache_status()}},
+\code{\link[=sinan_clear_cache]{sinan_clear_cache()}},
+\code{\link[=sinan_dictionary]{sinan_dictionary()}},
+\code{\link[=sinan_diseases]{sinan_diseases()}},
+\code{\link[=sinan_info]{sinan_info()}},
+\code{\link[=sinan_variables]{sinan_variables()}},
+\code{\link[=sinan_years]{sinan_years()}}
 }
 \concept{sinan}
